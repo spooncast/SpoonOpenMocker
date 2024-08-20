@@ -26,7 +26,11 @@ class MockerInterceptor @Inject constructor(
         }
 
         val response = chain.proceed(request)
-        mockerRepo.cache(request, response)
+
+        // 성공한 요청에 대해서만 caching을 수행한다.
+        if (response.isSuccessful) {
+            mockerRepo.cache(request, response)
+        }
 
         return response
     }
