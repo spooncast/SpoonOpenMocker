@@ -9,6 +9,6 @@ sealed interface MockerDialogState {
 
     data class SelectCode(
         val key: MockerKey,
-        val value: MockerValue
+        val code: Int
     ): MockerDialogState
 }
