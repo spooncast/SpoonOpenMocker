@@ -51,7 +51,7 @@ fun MockerPane(
         }
     ) {
         Pane(
-            items = vm.items,
+            items = vm.items.toList(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),

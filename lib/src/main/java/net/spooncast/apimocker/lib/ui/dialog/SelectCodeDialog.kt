@@ -44,7 +44,7 @@ fun SelectCodeDialog(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text(text = "Input http status code")
+            Text(text = "Modify http status code")
 
             TextField(
                 value = updatedCode,
@@ -70,7 +70,7 @@ fun SelectCodeDialog(
                         onClick(key, updatedCode.toIntOrNull() ?: code)
                     },
                     modifier = Modifier.width(100.dp),
-                    enabled = updatedCode.toIntOrNull() == null
+                    enabled = updatedCode.toIntOrNull() != null
                 ) {
                     Text(text = "Ok")
                 }
