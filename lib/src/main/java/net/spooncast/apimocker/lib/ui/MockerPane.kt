@@ -18,26 +18,44 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import net.spooncast.apimocker.lib.model.MockerKey
 import net.spooncast.apimocker.lib.model.MockerValue
 import net.spooncast.apimocker.lib.ui.component.MockerItem
+import net.spooncast.apimocker.lib.ui.dialog.MockerDialogState
+import net.spooncast.apimocker.lib.ui.dialog.SelectCodeDialog
 
 @Composable
 fun MockerPane(
     onBackPressed: () -> Unit,
+    vm: MockerViewModel = hiltViewModel()
 ) {
+    when (val state = vm.dialogState) {
+        is MockerDialogState.SelectCode -> {
+            SelectCodeDialog(
+                key = state.key,
+                code = state.code,
+                onDismiss = vm::hideDialog,
+                onClick = vm::onClickModifyCode
+            )
+        }
+        else -> { /* hide */ }
+    }
+
     Scaffold(
         topBar = {
-            TopBar(onBackPressed = onBackPressed)
+            TopBar(
+                onBackPressed = onBackPressed,
+                onClickClearAll = vm::onClickClearAll
+            )
         }
     ) {
-        // TODO : ViewModel 개발 후, 반영 예정 (items, onClick)
         Pane(
-            items = emptyList(),
+            items = vm.items,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
-            onClick = { _, _ -> }
+            onClick = vm::onClick
         )
     }
 }
@@ -46,7 +64,8 @@ fun MockerPane(
 @Composable
 private fun TopBar(
     modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onClickClearAll: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -60,6 +79,15 @@ private fun TopBar(
                 modifier = Modifier
                     .clip(CircleShape)
                     .clickable(onClick = onBackPressed)
+                    .padding(10.dp)
+            )
+        },
+        actions = {
+            Text(
+                text = "Clear All",
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onClickClearAll)
                     .padding(10.dp)
             )
         }
