@@ -17,14 +17,18 @@ class MockerViewModel @Inject constructor(
     private val mockerRepo: MockerRepo
 ): ViewModel() {
 
-    val items = mockerRepo.cachedMap.toList()
+    val items = mockerRepo.cachedMap
 
     var dialogState by mutableStateOf<MockerDialogState>(MockerDialogState.None)
         private set
 
     fun onClick(key: MockerKey, value: MockerValue) {
-        val code = value.mocked?.code ?: value.response.code
-        dialogState = MockerDialogState.SelectCode(key, code)
+        if (value.mocked == null) {
+            dialogState = MockerDialogState.SelectCode(key, value.response.code)
+            return
+        }
+
+        mockerRepo.unMock(key)
     }
 
     fun onClickModifyCode(key: MockerKey, code: Int) {
