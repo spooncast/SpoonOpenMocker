@@ -24,7 +24,7 @@ import net.spooncast.apimocker.lib.ui.component.MockerItem
 
 @Composable
 fun MockerPane(
-     onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
 ) {
     Scaffold(
         topBar = {
