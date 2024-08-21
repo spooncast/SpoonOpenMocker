@@ -74,4 +74,15 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+    kapt(libs.androidx.hilt.compiler)
+
+    // OkHttp
+    implementation(platform(libs.okhttp3.bom))
+    implementation(libs.okhttp3)
+    implementation(libs.okhttp3.logging.interceptor)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
 }
