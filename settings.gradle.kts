@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Spoon-Android-Api-Mocker"
+rootProject.name = "SpoonMirage"
 include(":app")
 include(":lib")

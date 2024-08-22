@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "net.spooncast.apimocker.lib"
+    namespace = "net.spooncast.mirage.lib"
     compileSdk = 34
 
     defaultConfig {

@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "net.spooncast.apimocker.demo"
+    namespace = "net.spooncast.mirage.demo"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "net.spooncast.apimocker.demo"
+        applicationId = "net.spooncast.mirage.demo"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
