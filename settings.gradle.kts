@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SpoonMirage"
+rootProject.name = "OpenMocker"
 include(":app")
 include(":lib")
