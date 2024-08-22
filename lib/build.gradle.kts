@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "net.spooncast.mirage.lib"
+    namespace = "net.spooncast.openmocker.lib"
     compileSdk = 34
 
     defaultConfig {
