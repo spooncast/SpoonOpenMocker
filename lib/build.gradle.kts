@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.kapt)
     alias(libs.plugins.google.dagger.hilt.android)
+    id("maven-publish")
 }
 
 android {
@@ -26,11 +27,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -68,4 +69,18 @@ dependencies {
     implementation(platform(libs.okhttp3.bom))
     implementation(libs.okhttp3)
     implementation(libs.okhttp3.logging.interceptor)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "net.spooncast"
+            artifactId = "openmocker"
+            version = "0.0.1"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
