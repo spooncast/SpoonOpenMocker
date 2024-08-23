@@ -1,25 +1,25 @@
 package net.spooncast.openmocker.lib.interceptor
 
-import net.spooncast.openmocker.lib.repo.OpenMockerRepo
+import net.spooncast.openmocker.lib.repo.CacheRepo
+import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
 import okhttp3.Interceptor
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
-import javax.inject.Inject
 
-class OpenMockerInterceptor @Inject constructor(
-    private val openMockerRepo: OpenMockerRepo
+class OpenMockerInterceptor private constructor(
+    private val cacheRepo: CacheRepo
 ): Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        val mocked = openMockerRepo.getMock(request)
+        val mock = cacheRepo.getMock(request)
 
-        if (mocked != null) {
+        if (mock != null) {
             return Response.Builder()
                 .protocol(Protocol.HTTP_2)
                 .request(request)
-                .code(mocked.code)
+                .code(mock.code)
                 .message(MOCKER_MESSAGE)
                 .body(MOCKER_MESSAGE.toResponseBody(null))
                 .build()
@@ -29,13 +29,19 @@ class OpenMockerInterceptor @Inject constructor(
 
         // 성공한 요청에 대해서만 caching을 수행한다.
         if (response.isSuccessful) {
-            openMockerRepo.cache(request, response)
+            cacheRepo.cache(request, response)
         }
 
         return response
     }
 
+    class Builder {
+        fun build(): OpenMockerInterceptor {
+            return OpenMockerInterceptor(MemCacheRepoImpl.getInstance())
+        }
+    }
+
     companion object {
-        const val MOCKER_MESSAGE = "Spoon api mocker enabled"
+        const val MOCKER_MESSAGE = "OpenMocker enabled"
     }
 }

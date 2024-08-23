@@ -1,6 +1,6 @@
 package net.spooncast.openmocker.lib.model
 
-data class OpenMockerKey(
+data class CachedKey(
     val method: String,
     val path: String
 )

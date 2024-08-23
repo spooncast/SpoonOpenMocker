@@ -4,43 +4,51 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import net.spooncast.openmocker.lib.model.OpenMockerKey
-import net.spooncast.openmocker.lib.model.OpenMockerResponse
-import net.spooncast.openmocker.lib.model.OpenMockerValue
-import net.spooncast.openmocker.lib.repo.OpenMockerRepo
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import net.spooncast.openmocker.lib.model.CachedKey
+import net.spooncast.openmocker.lib.model.CachedResponse
+import net.spooncast.openmocker.lib.model.CachedValue
+import net.spooncast.openmocker.lib.repo.CacheRepo
 import net.spooncast.openmocker.lib.ui.dialog.OpenMockerDialogState
-import javax.inject.Inject
 
-@HiltViewModel
-class OpenMockerViewModel @Inject constructor(
-    private val openMockerRepo: OpenMockerRepo
+class OpenMockerViewModel(
+    private val cacheRepo: CacheRepo
 ): ViewModel() {
 
-    val items = openMockerRepo.cachedMap
+    val items = cacheRepo.cachedMap
 
     var dialogState by mutableStateOf<OpenMockerDialogState>(OpenMockerDialogState.None)
         private set
 
-    fun onClick(key: OpenMockerKey, value: OpenMockerValue) {
-        if (value.mocked == null) {
+    fun onClick(key: CachedKey, value: CachedValue) {
+        if (value.mock == null) {
             dialogState = OpenMockerDialogState.SelectCode(key, value.response.code)
             return
         }
 
-        openMockerRepo.unMock(key)
+        cacheRepo.unMock(key)
     }
 
-    fun onClickModifyCode(key: OpenMockerKey, code: Int) {
+    fun onClickModifyCode(key: CachedKey, code: Int) {
         dialogState = OpenMockerDialogState.None
-        openMockerRepo.mock(key = key, response = OpenMockerResponse(code = code, body = ""))
+        cacheRepo.mock(key = key, response = CachedResponse(code = code, body = ""))
     }
 
     fun onClickClearAll() {
-        openMockerRepo.clearCache()
+        cacheRepo.clearCache()
     }
 
     fun hideDialog() {
         dialogState = OpenMockerDialogState.None
+    }
+
+    companion object {
+        fun provideFactory(repo: CacheRepo): ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                OpenMockerViewModel(repo)
+            }
+        }
     }
 }

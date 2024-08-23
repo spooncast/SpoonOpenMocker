@@ -1,6 +1,5 @@
 package net.spooncast.openmocker.demo.ui.weather
 
-import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import net.spooncast.openmocker.lib.OpenMockerActivity
+import net.spooncast.openmocker.lib.OpenMocker
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
 @Composable
@@ -34,8 +33,7 @@ fun WeatherPane(
         topBar = {
             TopBar(
                 onClickOpenMocker = {
-                    val intent = Intent(context, OpenMockerActivity::class.java)
-                    context.startActivity(intent)
+                    OpenMocker.show(context)
                 }
             )
         }

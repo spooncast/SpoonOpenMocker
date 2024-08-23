@@ -22,16 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import net.spooncast.openmocker.lib.model.OpenMockerKey
+import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.ui.common.HorizontalSpacer
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 
 @Composable
 fun SelectCodeDialog(
-    key: OpenMockerKey,
+    key: CachedKey,
     code: Int,
     onDismiss: () -> Unit,
-    onClick: (OpenMockerKey, Int) -> Unit
+    onClick: (CachedKey, Int) -> Unit
 ) {
     var updatedCode by remember { mutableStateOf("${code}") }
 
@@ -84,7 +84,7 @@ fun SelectCodeDialog(
 private fun PreviewSelectCodeDialog() {
     MaterialTheme {
         SelectCodeDialog(
-            key = OpenMockerKey(
+            key = CachedKey(
                 method = "GET",
                 path = "/mock/1234"
             ),

@@ -18,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import net.spooncast.openmocker.lib.model.OpenMockerKey
-import net.spooncast.openmocker.lib.model.OpenMockerResponse
-import net.spooncast.openmocker.lib.model.OpenMockerValue
+import net.spooncast.openmocker.lib.model.CachedKey
+import net.spooncast.openmocker.lib.model.CachedResponse
+import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
@@ -28,13 +28,13 @@ import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 @Composable
 fun OpenMockerItem(
     index: Int,
-    key: OpenMockerKey,
-    value: OpenMockerValue,
+    key: CachedKey,
+    value: CachedValue,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val isMocking = value.mocked != null
-    val code = value.mocked?.code ?: value.response.code
+    val isMocking = value.mock != null
+    val code = value.mock?.code ?: value.response.code
 
     Row(
         modifier = modifier
@@ -67,31 +67,31 @@ fun OpenMockerItem(
 @PreviewWithCondition
 @Composable
 private fun PreviewOpenMockerItem() {
-    val response = OpenMockerResponse(200, "")
-    val mocked = OpenMockerResponse(401, "")
+    val response = CachedResponse(200, "")
+    val mocked = CachedResponse(401, "")
 
     MaterialTheme {
         Column {
             OpenMockerItem(
                 index = 1,
-                key = OpenMockerKey(
+                key = CachedKey(
                     method = "GET",
                     path = "/mock/1234",
                 ),
-                value = OpenMockerValue(
+                value = CachedValue(
                     response = response
                 ),
                 onClick = {}
             )
             OpenMockerItem(
                 index = 1,
-                key = OpenMockerKey(
+                key = CachedKey(
                     method = "GET",
                     path = "/mock/1234",
                 ),
-                value = OpenMockerValue(
+                value = CachedValue(
                     response = response,
-                    mocked = mocked
+                    mock = mocked
                 ),
                 onClick = {}
             )
