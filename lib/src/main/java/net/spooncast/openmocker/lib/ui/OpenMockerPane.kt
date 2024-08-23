@@ -18,17 +18,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import net.spooncast.openmocker.lib.model.OpenMockerKey
-import net.spooncast.openmocker.lib.model.OpenMockerValue
+import net.spooncast.openmocker.lib.model.CachedKey
+import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.ui.component.OpenMockerItem
 import net.spooncast.openmocker.lib.ui.dialog.OpenMockerDialogState
 import net.spooncast.openmocker.lib.ui.dialog.SelectCodeDialog
 
 @Composable
 fun OpenMockerPane(
-    onBackPressed: () -> Unit,
-    vm: OpenMockerViewModel = hiltViewModel()
+    vm: OpenMockerViewModel,
+    onBackPressed: () -> Unit
 ) {
     when (val state = vm.dialogState) {
         is OpenMockerDialogState.SelectCode -> {
@@ -96,9 +95,9 @@ private fun TopBar(
 
 @Composable
 private fun Pane(
-    items: List<Pair<OpenMockerKey, OpenMockerValue>>,
+    items: List<Pair<CachedKey, CachedValue>>,
     modifier: Modifier = Modifier,
-    onClick: (OpenMockerKey, OpenMockerValue) -> Unit
+    onClick: (CachedKey, CachedValue) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,

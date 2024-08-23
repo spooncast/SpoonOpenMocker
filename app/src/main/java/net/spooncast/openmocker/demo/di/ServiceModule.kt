@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.spooncast.openmocker.demo.service.WeatherApiService
-import net.spooncast.openmocker.lib.interceptor.OpenMockerInterceptor
+import net.spooncast.openmocker.lib.OpenMocker
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -17,9 +17,9 @@ object ServiceModule {
 
     @Provides
     @Singleton
-    fun provideWeatherApiService(interceptor: OpenMockerInterceptor): WeatherApiService {
+    fun provideWeatherApiService(): WeatherApiService {
         val client = OkHttpClient.Builder()
-            .addInterceptor(interceptor)
+            .addInterceptor(OpenMocker.getInterceptor())
             .build()
 
         val retrofit = Retrofit.Builder()

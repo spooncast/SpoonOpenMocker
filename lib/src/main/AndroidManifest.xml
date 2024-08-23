@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name=".OpenMockerActivity"
+            android:name=".ui.OpenMockerActivity"
             android:exported="true"
             android:theme="@android:style/Theme.NoTitleBar" />
     </application>
