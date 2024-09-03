@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.kapt)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.jetbrains.kotlin.compose)
     id("maven-publish")
 }
 
@@ -35,8 +37,8 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+    composeCompiler {
+        enableStrongSkippingMode = true
     }
 }
 
@@ -62,6 +64,12 @@ dependencies {
     implementation(platform(libs.okhttp3.bom))
     implementation(libs.okhttp3)
     implementation(libs.okhttp3.logging.interceptor)
+
+    // Navigation Compose
+    implementation(libs.navigation.compose)
+
+    // Serialization
+    implementation(libs.jetbrains.kotlinx.serialization.json)
 }
 
 publishing {

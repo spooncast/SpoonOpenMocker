@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.ui
+package net.spooncast.openmocker.lib.ui.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,13 +20,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedValue
-import net.spooncast.openmocker.lib.ui.component.OpenMockerItem
-import net.spooncast.openmocker.lib.ui.dialog.OpenMockerDialogState
-import net.spooncast.openmocker.lib.ui.dialog.SelectCodeDialog
+import net.spooncast.openmocker.lib.ui.list.component.ApiItem
+import net.spooncast.openmocker.lib.ui.list.dialog.OpenMockerDialogState
+import net.spooncast.openmocker.lib.ui.list.dialog.SelectCodeDialog
 
 @Composable
-fun OpenMockerPane(
-    vm: OpenMockerViewModel,
+fun ApiListPane(
+    vm: ApiListViewModel,
     onBackPressed: () -> Unit
 ) {
     when (val state = vm.dialogState) {
@@ -104,7 +104,7 @@ private fun Pane(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         itemsIndexed(items) { index, (key, value) ->
-            OpenMockerItem(
+            ApiItem(
                 index = index + 1,
                 key = key,
                 value = value,

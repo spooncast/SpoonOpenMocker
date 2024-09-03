@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.ui.dialog
+package net.spooncast.openmocker.lib.ui.list.dialog
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,6 +1,5 @@
-package net.spooncast.openmocker.lib.ui.component
+package net.spooncast.openmocker.lib.ui.list.component
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,9 +23,8 @@ import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OpenMockerItem(
+fun ApiItem(
     index: Int,
     key: CachedKey,
     value: CachedValue,
@@ -66,13 +64,13 @@ fun OpenMockerItem(
 
 @PreviewWithCondition
 @Composable
-private fun PreviewOpenMockerItem() {
+private fun PreviewApiItem() {
     val response = CachedResponse(200, "")
     val mocked = CachedResponse(401, "")
 
     MaterialTheme {
         Column {
-            OpenMockerItem(
+            ApiItem(
                 index = 1,
                 key = CachedKey(
                     method = "GET",
@@ -83,7 +81,7 @@ private fun PreviewOpenMockerItem() {
                 ),
                 onClick = {}
             )
-            OpenMockerItem(
+            ApiItem(
                 index = 1,
                 key = CachedKey(
                     method = "GET",
