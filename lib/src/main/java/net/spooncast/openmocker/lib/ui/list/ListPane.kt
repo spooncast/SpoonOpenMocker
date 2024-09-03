@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.ui
+package net.spooncast.openmocker.lib.ui.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,8 +25,8 @@ import net.spooncast.openmocker.lib.ui.dialog.OpenMockerDialogState
 import net.spooncast.openmocker.lib.ui.dialog.SelectCodeDialog
 
 @Composable
-fun OpenMockerPane(
-    vm: OpenMockerViewModel,
+fun ListPane(
+    vm: ListViewModel,
     onBackPressed: () -> Unit
 ) {
     when (val state = vm.dialogState) {

@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.ui
+package net.spooncast.openmocker.lib.ui.list
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,7 +13,7 @@ import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.repo.CacheRepo
 import net.spooncast.openmocker.lib.ui.dialog.OpenMockerDialogState
 
-class OpenMockerViewModel(
+class ListViewModel(
     private val cacheRepo: CacheRepo
 ): ViewModel() {
 
@@ -47,7 +47,7 @@ class OpenMockerViewModel(
     companion object {
         fun provideFactory(repo: CacheRepo): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                OpenMockerViewModel(repo)
+                ListViewModel(repo)
             }
         }
     }
