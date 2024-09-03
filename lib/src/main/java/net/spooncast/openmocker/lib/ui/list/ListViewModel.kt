@@ -11,7 +11,7 @@ import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.repo.CacheRepo
-import net.spooncast.openmocker.lib.ui.dialog.OpenMockerDialogState
+import net.spooncast.openmocker.lib.ui.list.dialog.OpenMockerDialogState
 
 class ListViewModel(
     private val cacheRepo: CacheRepo

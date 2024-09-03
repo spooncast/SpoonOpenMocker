@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.ui.dialog
+package net.spooncast.openmocker.lib.ui.list.dialog
 
 import net.spooncast.openmocker.lib.model.CachedKey
 
