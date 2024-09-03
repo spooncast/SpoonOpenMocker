@@ -25,8 +25,8 @@ import net.spooncast.openmocker.lib.ui.list.dialog.OpenMockerDialogState
 import net.spooncast.openmocker.lib.ui.list.dialog.SelectCodeDialog
 
 @Composable
-fun ListPane(
-    vm: ListViewModel,
+fun ApiListPane(
+    vm: ApiListViewModel,
     onBackPressed: () -> Unit
 ) {
     when (val state = vm.dialogState) {

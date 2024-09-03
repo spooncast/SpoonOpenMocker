@@ -13,7 +13,7 @@ import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.repo.CacheRepo
 import net.spooncast.openmocker.lib.ui.list.dialog.OpenMockerDialogState
 
-class ListViewModel(
+class ApiListViewModel(
     private val cacheRepo: CacheRepo
 ): ViewModel() {
 
@@ -47,7 +47,7 @@ class ListViewModel(
     companion object {
         fun provideFactory(repo: CacheRepo): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                ListViewModel(repo)
+                ApiListViewModel(repo)
             }
         }
     }

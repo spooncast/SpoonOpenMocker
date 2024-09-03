@@ -14,8 +14,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
-import net.spooncast.openmocker.lib.ui.list.ListPane
-import net.spooncast.openmocker.lib.ui.list.ListViewModel
+import net.spooncast.openmocker.lib.ui.list.ApiListPane
+import net.spooncast.openmocker.lib.ui.list.ApiListViewModel
 
 sealed interface Destination {
     @Serializable
@@ -36,10 +36,10 @@ fun OpenMockerApp() {
     ) {
         composable<Destination.List> {
             val cacheRepo = MemCacheRepoImpl.getInstance()
-            val viewModel: ListViewModel = viewModel(
-                factory = ListViewModel.provideFactory(cacheRepo)
+            val viewModel: ApiListViewModel = viewModel(
+                factory = ApiListViewModel.provideFactory(cacheRepo)
             )
-            ListPane(
+            ApiListPane(
                 vm = viewModel,
                 onBackPressed = { (context as Activity).finish() }
             )
