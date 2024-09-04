@@ -1,6 +1,7 @@
 package net.spooncast.openmocker.lib.repo
 
 import androidx.compose.runtime.mutableStateMapOf
+import net.spooncast.openmocker.lib.ext.pretty
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.model.CachedValue
@@ -15,8 +16,9 @@ class MemCacheRepoImpl private constructor(): CacheRepo {
 
     override fun cache(request: Request, response: Response) {
         val key = CachedKey(request.method, request.url.encodedPath)
-        val mockerRes = CachedResponse(response.code, response.body.toString())
-        _cachedMap[key] = CachedValue(response = mockerRes)
+        val body = response.peekBody(MAX_BYTE_COUNT).string().pretty()
+        val cachedResponse = CachedResponse(response.code, body)
+        _cachedMap[key] = CachedValue(response = cachedResponse)
     }
 
     override fun clearCache() {
@@ -42,6 +44,9 @@ class MemCacheRepoImpl private constructor(): CacheRepo {
     }
 
     companion object {
+        private const val MAX_BYTE_COUNT = 2048L
+
+
         @Volatile
         private var instance: MemCacheRepoImpl? = null
 

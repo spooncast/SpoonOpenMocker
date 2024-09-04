@@ -21,7 +21,7 @@ class OpenMockerInterceptor private constructor(
                 .request(request)
                 .code(mock.code)
                 .message(MOCKER_MESSAGE)
-                .body(MOCKER_MESSAGE.toResponseBody(null))
+                .body(mock.body.toResponseBody())
                 .build()
         }
 
