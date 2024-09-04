@@ -1,19 +1,17 @@
 package net.spooncast.openmocker.lib.ui
 
 import android.app.Activity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
+import net.spooncast.openmocker.lib.ui.detail.ApiDetailPane
+import net.spooncast.openmocker.lib.ui.detail.ApiDetailViewModel
 import net.spooncast.openmocker.lib.ui.list.ApiListPane
 import net.spooncast.openmocker.lib.ui.list.ApiListViewModel
 
@@ -22,7 +20,12 @@ sealed interface Destination {
     object List
 
     @Serializable
-    object Detail
+    data class Detail(
+        val method: String,
+        val path: String,
+        val code: Int,
+        val body: String
+    )
 }
 
 @Composable
@@ -41,16 +44,24 @@ fun OpenMockerApp() {
             )
             ApiListPane(
                 vm = viewModel,
-                onBackPressed = { (context as Activity).finish() }
+                onBackPressed = { (context as Activity).finish() },
+                onClickDetail = { key, value ->
+                    val code = value.mock?.code ?: value.response.code
+                    val body = value.mock?.body ?: value.response.body
+                    navController.navigate(Destination.Detail(key.method, key.path, code, body))
+                }
             )
         }
-        composable<Destination.Detail> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "detail screen")
-            }
+        composable<Destination.Detail> { backStackEntry ->
+            val detail = backStackEntry.toRoute<Destination.Detail>()
+            val cacheRepo = MemCacheRepoImpl.getInstance()
+            val viewModel: ApiDetailViewModel = viewModel(
+                factory = ApiDetailViewModel.provideFactory(detail, cacheRepo)
+            )
+            ApiDetailPane(
+                vm = viewModel,
+                onBackPressed = navController::popBackStack
+            )
         }
     }
 }
