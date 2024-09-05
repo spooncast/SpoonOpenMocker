@@ -19,6 +19,8 @@ import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.ui.common.TopBar
 import net.spooncast.openmocker.lib.ui.list.component.ApiItem
+import net.spooncast.openmocker.lib.ui.list.dialog.ApiListDialogState
+import net.spooncast.openmocker.lib.ui.list.dialog.UnMockDialog
 
 @Composable
 fun ApiListPane(
@@ -26,6 +28,16 @@ fun ApiListPane(
     onBackPressed: () -> Unit,
     onClickDetail: (CachedKey, CachedValue) -> Unit
 ) {
+    when (val state = vm.showDialog) {
+        is ApiListDialogState.UnMock -> {
+            UnMockDialog(
+                onDismiss = vm::hideDialog,
+                onClickOk = { vm.unMock(state.key) }
+            )
+        }
+        else -> { /* Do nothing */ }
+    }
+    
     Scaffold(
         topBar = {
             TopBar(
@@ -33,7 +45,7 @@ fun ApiListPane(
                 onBackPressed = onBackPressed,
                 actions = {
                     Text(
-                        text = stringResource(id = R.string.clear_all),
+                        text = stringResource(id = R.string.release_all_mocking),
                         modifier = Modifier
                             .clip(CircleShape)
                             .clickable(onClick = vm::onClickClearAll)
@@ -48,7 +60,8 @@ fun ApiListPane(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
-            onClick = onClickDetail
+            onClick = onClickDetail,
+            onLongClick = vm::onLongClick
         )
     }
 }
@@ -57,7 +70,8 @@ fun ApiListPane(
 private fun Pane(
     items: List<Pair<CachedKey, CachedValue>>,
     modifier: Modifier = Modifier,
-    onClick: (CachedKey, CachedValue) -> Unit
+    onClick: (CachedKey, CachedValue) -> Unit,
+    onLongClick: (CachedKey, CachedValue) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -68,7 +82,8 @@ private fun Pane(
                 index = index + 1,
                 key = key,
                 value = value,
-                onClick = { onClick(key, value) }
+                onClick = { onClick(key, value) },
+                onLongClick = { onLongClick(key, value) }
             )
         }
     }

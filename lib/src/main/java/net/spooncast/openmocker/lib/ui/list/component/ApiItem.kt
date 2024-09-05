@@ -1,7 +1,8 @@
 package net.spooncast.openmocker.lib.ui.list.component
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,13 +24,15 @@ import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ApiItem(
     index: Int,
     key: CachedKey,
     value: CachedValue,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     val isMocking = value.mock != null
     val code = value.mock?.code ?: value.response.code
@@ -37,7 +40,10 @@ fun ApiItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick
+            )
             .padding(horizontal = 15.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -79,7 +85,8 @@ private fun PreviewApiItem() {
                 value = CachedValue(
                     response = response
                 ),
-                onClick = {}
+                onClick = {},
+                onLongClick = {}
             )
             ApiItem(
                 index = 1,
@@ -91,7 +98,8 @@ private fun PreviewApiItem() {
                     response = response,
                     mock = mocked
                 ),
-                onClick = {}
+                onClick = {},
+                onLongClick = {}
             )
         }
     }

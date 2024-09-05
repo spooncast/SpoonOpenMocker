@@ -6,12 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.R
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.TopBar
+import net.spooncast.openmocker.lib.ui.common.TwoButtons
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 import net.spooncast.openmocker.lib.ui.detail.component.CodeItem
 
@@ -100,7 +99,7 @@ private fun Pane(
 
         VerticalSpacer(size = 25.dp)
 
-        ButtonArea(
+        TwoButtons(
             onClickCancel = onClickClose,
             onClickOk = {
                 onClickModify(method, path, selectedCode, updatedBody)
@@ -176,31 +175,6 @@ private fun UpdateResponseBodyArea(
                     textAlign = TextAlign.Center
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun ButtonArea(
-    modifier: Modifier = Modifier,
-    onClickCancel: () -> Unit,
-    onClickOk: () -> Unit
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Button(
-            onClick = onClickCancel,
-            modifier = Modifier.weight(1F, true)
-        ) {
-            Text(text = stringResource(id = R.string.common_cancel))
-        }
-        Button(
-            onClick = onClickOk,
-            modifier = Modifier.weight(1F, true)
-        ) {
-            Text(text = stringResource(id = R.string.common_ok))
         }
     }
 }
