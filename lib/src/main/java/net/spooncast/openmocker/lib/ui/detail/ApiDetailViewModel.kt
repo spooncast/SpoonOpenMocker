@@ -39,8 +39,6 @@ class ApiDetailViewModel(
     }
 
     companion object {
-        private const val KEY_DETAIL = "key_detail"
-
         fun provideFactory(
             repo: CacheRepo
         ): ViewModelProvider.Factory = viewModelFactory {
