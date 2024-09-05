@@ -12,7 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.spooncast.openmocker.lib.R
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.ui.common.TopBar
@@ -31,7 +33,7 @@ fun ApiListPane(
                 onBackPressed = onBackPressed,
                 actions = {
                     Text(
-                        text = "Clear All",
+                        text = stringResource(id = R.string.clear_all),
                         modifier = Modifier
                             .clip(CircleShape)
                             .clickable(onClick = vm::onClickClearAll)

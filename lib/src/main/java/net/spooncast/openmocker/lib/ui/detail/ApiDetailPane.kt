@@ -25,8 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import net.spooncast.openmocker.lib.R
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.TopBar
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
@@ -118,7 +120,7 @@ private fun UpdateResponseCodeArea(
         modifier = modifier.fillMaxWidth()
     ) {
         Text(
-            text = "응답 코드 수정",
+            text = stringResource(id = R.string.update_response_code),
             style = MaterialTheme.typography.titleLarge
         )
         VerticalSpacer(size = 15.dp)
@@ -149,7 +151,7 @@ private fun UpdateResponseBodyArea(
         modifier = modifier.fillMaxWidth()
     ) {
         Text(
-            text = "응답 수정",
+            text = stringResource(id = R.string.update_response_body),
             style = MaterialTheme.typography.titleLarge
         )
         VerticalSpacer(size = 15.dp)
@@ -170,7 +172,7 @@ private fun UpdateResponseBodyArea(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "응답 Body를 수정할 수 없습니다.",
+                    text = stringResource(id = R.string.update_restrictions),
                     textAlign = TextAlign.Center
                 )
             }
@@ -192,13 +194,13 @@ private fun ButtonArea(
             onClick = onClickCancel,
             modifier = Modifier.weight(1F, true)
         ) {
-            Text(text = "취소")
+            Text(text = stringResource(id = R.string.common_cancel))
         }
         Button(
             onClick = onClickOk,
             modifier = Modifier.weight(1F, true)
         ) {
-            Text(text = "수정")
+            Text(text = stringResource(id = R.string.common_ok))
         }
     }
 }

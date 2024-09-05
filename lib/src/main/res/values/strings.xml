@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Common-->
+    <string name="common_ok">OK</string>
+    <string name="common_cancel">Cancel</string>
+
+    <!--List-->
+    <string name="title_api_list">API List</string>
+    <string name="clear_all">Clear All</string>
+    
+    <!--Detail-->
+    <string name="title_api_detail">API Detail</string>
+    <string name="update_response_code">Update Response Code</string>
+    <string name="update_response_body">Update Response Body</string>
+    <string name="update_restrictions">Updates are restricted\nfrom this response code.</string>
+</resources>
