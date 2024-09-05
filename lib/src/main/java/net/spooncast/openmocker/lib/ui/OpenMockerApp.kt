@@ -2,6 +2,8 @@ package net.spooncast.openmocker.lib.ui
 
 import android.app.Activity
 import android.os.Parcelable
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,7 +56,20 @@ fun OpenMockerApp() {
                 }
             )
         }
-        composable<Destination.Detail> {
+        composable<Destination.Detail>(
+            enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start,
+                    tween(700)
+                )
+            },
+            exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End,
+                    tween(700)
+                )
+            }
+        ) {
             val cacheRepo = MemCacheRepoImpl.getInstance()
             val viewModel: ApiDetailViewModel = viewModel(
                 factory = ApiDetailViewModel.provideFactory(cacheRepo)
