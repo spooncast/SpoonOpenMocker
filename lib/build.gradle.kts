@@ -70,6 +70,9 @@ dependencies {
 
     // Serialization
     implementation(libs.jetbrains.kotlinx.serialization.json)
+
+    // Gson
+    implementation(libs.gson)
 }
 
 publishing {
