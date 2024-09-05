@@ -48,7 +48,7 @@ fun ApiDetailPane(
     Scaffold(
         topBar = {
             TopBar(
-                title = "상세 정보",
+                title = stringResource(id = R.string.title_api_detail),
                 onBackPressed = onBackPressed
             )
         }
