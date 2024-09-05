@@ -16,11 +16,8 @@ class MemCacheRepoImpl private constructor(): CacheRepo {
 
     override fun cache(request: Request, response: Response) {
         val key = CachedKey(request.method, request.url.encodedPath)
-
-        val body = runCatching { response.peekBody(MAX_BYTE_COUNT).string().pretty() }
-            .getOrDefault("")
+        val body = response.peekBody(MAX_BYTE_COUNT).string().pretty()
         val cachedResponse = CachedResponse(response.code, body)
-
         _cachedMap[key] = CachedValue(response = cachedResponse)
     }
 
@@ -48,6 +45,7 @@ class MemCacheRepoImpl private constructor(): CacheRepo {
 
     companion object {
         private const val MAX_BYTE_COUNT = 2048L
+
 
         @Volatile
         private var instance: MemCacheRepoImpl? = null
