@@ -53,10 +53,10 @@ fun ApiDetailPane(
         }
     ) {
         Pane(
-            method = vm.apiDetail.method,
-            path = vm.apiDetail.path,
-            code = vm.apiDetail.code,
-            body = vm.apiDetail.body,
+            method = vm.method,
+            path = vm.path,
+            code = vm.code,
+            body = vm.body,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),

@@ -1,10 +1,9 @@
 package net.spooncast.openmocker.lib.ui.detail
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -13,15 +12,16 @@ import kotlinx.coroutines.launch
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.repo.CacheRepo
-import net.spooncast.openmocker.lib.ui.Destination
 
 class ApiDetailViewModel(
-    private val detail: Destination.Detail,
+    private val savedStateHandle: SavedStateHandle,
     private val repo: CacheRepo
 ): ViewModel() {
 
-    var apiDetail by mutableStateOf(detail)
-        private set
+    val method = checkNotNull(savedStateHandle.get<String>("method"))
+    val path = checkNotNull(savedStateHandle.get<String>("path"))
+    val code = checkNotNull(savedStateHandle.get<Int>("code"))
+    val body = checkNotNull(savedStateHandle.get<String>("body"))
 
     var close = MutableSharedFlow<Unit>()
         private set
@@ -39,12 +39,13 @@ class ApiDetailViewModel(
     }
 
     companion object {
+        private const val KEY_DETAIL = "key_detail"
+
         fun provideFactory(
-            detail: Destination.Detail,
             repo: CacheRepo
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                ApiDetailViewModel(detail, repo)
+                ApiDetailViewModel(createSavedStateHandle(), repo)
             }
         }
     }
