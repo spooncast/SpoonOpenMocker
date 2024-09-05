@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.kapt)
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.jetbrains.kotlin.compose)
+    alias(libs.plugins.jetbrains.kotlin.parcelize)
     id("maven-publish")
 }
 

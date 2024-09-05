@@ -1,13 +1,14 @@
 package net.spooncast.openmocker.lib.ui
 
 import android.app.Activity
+import android.os.Parcelable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
 import net.spooncast.openmocker.lib.ui.detail.ApiDetailPane
@@ -20,12 +21,13 @@ sealed interface Destination {
     object List
 
     @Serializable
+    @Parcelize
     data class Detail(
         val method: String,
         val path: String,
         val code: Int,
         val body: String
-    )
+    ): Parcelable
 }
 
 @Composable
@@ -52,11 +54,10 @@ fun OpenMockerApp() {
                 }
             )
         }
-        composable<Destination.Detail> { backStackEntry ->
-            val detail = backStackEntry.toRoute<Destination.Detail>()
+        composable<Destination.Detail> {
             val cacheRepo = MemCacheRepoImpl.getInstance()
             val viewModel: ApiDetailViewModel = viewModel(
-                factory = ApiDetailViewModel.provideFactory(detail, cacheRepo)
+                factory = ApiDetailViewModel.provideFactory(cacheRepo)
             )
             ApiDetailPane(
                 vm = viewModel,
