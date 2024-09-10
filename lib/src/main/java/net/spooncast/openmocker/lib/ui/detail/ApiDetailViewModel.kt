@@ -26,9 +26,7 @@ class ApiDetailViewModel(
     var close = MutableSharedFlow<Unit>()
         private set
 
-    fun onClickComplete(
-        method: String,
-        path: String,
+    fun onClickSave(
         code: Int,
         body: String
     ) {

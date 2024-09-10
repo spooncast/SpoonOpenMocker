@@ -2,17 +2,15 @@ package net.spooncast.openmocker.lib.ui.detail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -30,15 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.R
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.TopBar
-import net.spooncast.openmocker.lib.ui.common.TwoButtons
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
 private val successCodes = listOf(200, 201, 202)
@@ -49,78 +45,84 @@ fun ApiDetailPane(
     vm: ApiDetailViewModel,
     onBackPressed: () -> Unit
 ) {
+    var updatedCode by remember { mutableIntStateOf(vm.code) }
+    var updatedBody by remember { mutableStateOf(vm.body) }
+
     LaunchedEffect(key1 = Unit) {
         vm.close.collect { onBackPressed() }
     }
 
     Scaffold(
         topBar = {
-            TopBar(
-                title = stringResource(id = R.string.title_api_detail),
-                onBackPressed = onBackPressed
+            DetailTopBar(
+                onBackPressed = onBackPressed,
+                onClickSave = { vm.onClickSave(updatedCode, updatedBody) }
             )
         }
     ) {
         Pane(
-            method = vm.method,
-            path = vm.path,
-            code = vm.code,
-            body = vm.body,
+            code = updatedCode,
+            body = updatedBody,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it),
-            onClickClose = onBackPressed,
-            onClickModify = vm::onClickComplete
+                .padding(it)
+                .padding(15.dp),
+            onUpdateCode = { code -> updatedCode = code },
+            onUpdateBody = { body -> updatedBody = body }
         )
     }
 }
 
 @Composable
 private fun Pane(
-    method: String,
-    path: String,
     code: Int,
     body: String,
     modifier: Modifier = Modifier,
-    onClickClose: () -> Unit,
-    onClickModify: (String, String, Int, String) -> Unit,
+    onUpdateCode: (Int) -> Unit,
+    onUpdateBody: (String) -> Unit
 ) {
-    var selectedCode by remember { mutableIntStateOf(code) }
-    var updatedBody by remember { mutableStateOf(body) }
-
     Column(
-        modifier = modifier.padding(15.dp)
+        modifier = modifier
     ) {
         UpdateResponseCodeArea(
-            selectedCode = selectedCode,
-            onSelectCode = { selectedCode = it}
+            updatedCode = code,
+            onUpdateCode = onUpdateCode
         )
-
-        VerticalSpacer(size = 25.dp)
-
+        VerticalSpacer(size = 15.dp)
         UpdateResponseBodyArea(
-            selectedCode = selectedCode,
-            updatedBody = updatedBody,
+            updatedCode = code,
+            updatedBody = body,
             modifier = Modifier.weight(1F, true),
-            onUpdateBody = { updatedBody = it }
-        )
-
-        VerticalSpacer(size = 25.dp)
-
-        TwoButtons(
-            onClickCancel = onClickClose,
-            onClickOk = {
-                onClickModify(method, path, selectedCode, updatedBody)
-            }
+            onUpdateBody = onUpdateBody
         )
     }
 }
 
 @Composable
+private fun DetailTopBar(
+    onBackPressed: () -> Unit,
+    onClickSave: () -> Unit
+) {
+    TopBar(
+        title = stringResource(id = R.string.title_api_detail),
+        onBackPressed = onBackPressed,
+        actions = {
+            Text(
+                text = stringResource(id = R.string.common_save),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onClickSave)
+                    .padding(10.dp)
+            )
+        }
+    )
+}
+
+@Composable
 private fun UpdateResponseCodeArea(
-    selectedCode: Int,
+    updatedCode: Int,
     modifier: Modifier = Modifier,
-    onSelectCode: (Int) -> Unit
+    onUpdateCode: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -143,7 +145,7 @@ private fun UpdateResponseCodeArea(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "${selectedCode}",
+                    text = "${updatedCode}",
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.titleMedium,
                 )
@@ -166,7 +168,7 @@ private fun UpdateResponseCodeArea(
                             )
                         },
                         onClick = {
-                            onSelectCode(code)
+                            onUpdateCode(code)
                             expanded = false
                         },
                     )
@@ -178,7 +180,7 @@ private fun UpdateResponseCodeArea(
 
 @Composable
 private fun UpdateResponseBodyArea(
-    selectedCode: Int,
+    updatedCode: Int,
     updatedBody: String,
     modifier: Modifier = Modifier,
     onUpdateBody: (String) -> Unit
@@ -188,11 +190,11 @@ private fun UpdateResponseBodyArea(
     ) {
         Text(
             text = stringResource(id = R.string.update_response_body),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleMedium
         )
         VerticalSpacer(size = 15.dp)
 
-        if (selectedCode in successCodes) {
+        if (updatedCode in successCodes) {
             TextField(
                 value = updatedBody,
                 onValueChange = onUpdateBody,
@@ -228,13 +230,13 @@ private fun PreviewPane() {
     """.trimIndent()
     MaterialTheme {
         Pane(
-            method = "GET",
-            path = "/api/test",
             code = 401,
             body = body,
-            modifier = Modifier.fillMaxSize(),
-            onClickClose = {},
-            onClickModify = { _, _, _, _ -> }
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp),
+            onUpdateCode = {},
+            onUpdateBody = {},
         )
     }
 }
