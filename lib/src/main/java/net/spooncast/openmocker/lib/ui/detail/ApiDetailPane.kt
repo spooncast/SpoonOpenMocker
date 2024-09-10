@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,9 +34,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.R
+import net.spooncast.openmocker.lib.ui.common.HorizontalSpacer
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.TopBar
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
+import net.spooncast.openmocker.lib.ui.detail.component.MethodChip
 
 private val successCodes = listOf(200, 201, 202)
 private val failureCodes = listOf(400, 401, 403, 404, 500)
@@ -61,6 +64,8 @@ fun ApiDetailPane(
         }
     ) {
         Pane(
+            method = vm.method,
+            path = vm.path,
             code = updatedCode,
             body = updatedBody,
             modifier = Modifier
@@ -75,6 +80,8 @@ fun ApiDetailPane(
 
 @Composable
 private fun Pane(
+    method: String,
+    path: String,
     code: Int,
     body: String,
     modifier: Modifier = Modifier,
@@ -84,6 +91,11 @@ private fun Pane(
     Column(
         modifier = modifier
     ) {
+        DetailHeader(
+            method = method,
+            path = path
+        )
+        VerticalSpacer(size = 15.dp)
         UpdateResponseCodeArea(
             updatedCode = code,
             onUpdateCode = onUpdateCode
@@ -119,6 +131,29 @@ private fun DetailTopBar(
 }
 
 @Composable
+private fun DetailHeader(
+    method: String,
+    path: String,
+    modifier: Modifier = Modifier
+) {
+    var lineCnt by remember { mutableIntStateOf(1) }
+    val alignment = if (lineCnt == 1) Alignment.CenterVertically else Alignment.Top
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = alignment
+    ) {
+        MethodChip(method = method)
+        HorizontalSpacer(size = 15.dp)
+        Text(
+            text = path,
+            onTextLayout = { result -> lineCnt = result.lineCount },
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Composable
 private fun UpdateResponseCodeArea(
     updatedCode: Int,
     modifier: Modifier = Modifier,
@@ -138,6 +173,7 @@ private fun UpdateResponseCodeArea(
         Box(
             modifier = Modifier
                 .weight(1F, true)
+                .height(30.dp)
                 .clickable { expanded = true },
             contentAlignment = Alignment.Center
         ) {
@@ -230,6 +266,8 @@ private fun PreviewPane() {
     """.trimIndent()
     MaterialTheme {
         Pane(
+            method = "GET",
+            path = "/weather?lat=44.34&lon=10.99&appId=12341234123412341234",
             code = 401,
             body = body,
             modifier = Modifier
