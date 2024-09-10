@@ -1,15 +1,22 @@
 package net.spooncast.openmocker.lib.ui.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,7 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.R
@@ -31,7 +40,6 @@ import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.TopBar
 import net.spooncast.openmocker.lib.ui.common.TwoButtons
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
-import net.spooncast.openmocker.lib.ui.detail.component.CodeItem
 
 private val successCodes = listOf(200, 201, 202)
 private val failureCodes = listOf(400, 401, 403, 404, 500)
@@ -81,7 +89,7 @@ private fun Pane(
     var updatedBody by remember { mutableStateOf(body) }
 
     Column(
-        modifier = modifier.padding(10.dp)
+        modifier = modifier.padding(15.dp)
     ) {
         UpdateResponseCodeArea(
             selectedCode = selectedCode,
@@ -108,32 +116,61 @@ private fun Pane(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun UpdateResponseCodeArea(
     selectedCode: Int,
     modifier: Modifier = Modifier,
     onSelectCode: (Int) -> Unit
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth()
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = stringResource(id = R.string.update_response_code),
-            style = MaterialTheme.typography.titleLarge
+            modifier = Modifier.weight(1F, true),
+            style = MaterialTheme.typography.titleMedium
         )
-        VerticalSpacer(size = 15.dp)
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            maxItemsInEachRow = 6
+        Box(
+            modifier = Modifier
+                .weight(1F, true)
+                .clickable { expanded = true },
+            contentAlignment = Alignment.Center
         ) {
-            (successCodes + failureCodes).forEach {
-                CodeItem(
-                    code = it,
-                    selected = (it == selectedCode),
-                    onSelect = { onSelectCode(it) }
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "${selectedCode}",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.titleMedium,
                 )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    contentDescription = null
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                (successCodes + failureCodes).forEach { code ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "${code}",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        },
+                        onClick = {
+                            onSelectCode(code)
+                            expanded = false
+                        },
+                    )
+                }
             }
         }
     }

@@ -13,7 +13,7 @@
 
     <!--Detail-->
     <string name="title_api_detail">API Detail</string>
-    <string name="update_response_code">Update Response Code</string>
+    <string name="update_response_code">Response Code</string>
     <string name="update_response_body">Update Response Body</string>
     <string name="update_restrictions">Updates are restricted\nfrom that response code.</string>
 </resources>
