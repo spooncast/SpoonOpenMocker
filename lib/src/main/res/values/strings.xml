@@ -15,6 +15,7 @@
     <!--Detail-->
     <string name="title_api_detail">API Detail</string>
     <string name="update_response_code">Response Code</string>
+    <string name="update_duration">Response Duration</string>
     <string name="update_response_body">Response Body</string>
     <string name="update_restrictions">Updates are restricted\nfrom that response code.</string>
 </resources>

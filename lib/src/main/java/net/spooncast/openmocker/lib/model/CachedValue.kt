@@ -11,5 +11,6 @@ data class CachedValue(
 @Serializable
 data class CachedResponse(
     val code: Int,
-    val body: String
+    val body: String,
+    val duration: Long = 0L
 )

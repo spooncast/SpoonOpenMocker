@@ -1,5 +1,7 @@
 package net.spooncast.openmocker.lib.interceptor
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import net.spooncast.openmocker.lib.repo.CacheRepo
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
 import okhttp3.Interceptor
@@ -16,6 +18,8 @@ class OpenMockerInterceptor private constructor(
         val mock = cacheRepo.getMock(request)
 
         if (mock != null) {
+            runBlocking { delay(mock.duration) }
+            
             return Response.Builder()
                 .protocol(Protocol.HTTP_2)
                 .request(request)

@@ -28,7 +28,8 @@ sealed interface Destination {
         val method: String,
         val path: String,
         val code: Int,
-        val body: String
+        val body: String,
+        val duration: Long
     ): Parcelable
 }
 
@@ -52,7 +53,8 @@ fun OpenMockerApp() {
                 onClickDetail = { key, value ->
                     val code = value.mock?.code ?: value.response.code
                     val body = value.mock?.body ?: value.response.body
-                    navController.navigate(Destination.Detail(key.method, key.path, code, body))
+                    val duration = value.mock?.duration ?: value.response.duration
+                    navController.navigate(Destination.Detail(key.method, key.path, code, body, duration))
                 }
             )
         }

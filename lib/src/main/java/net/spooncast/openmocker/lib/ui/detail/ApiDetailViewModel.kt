@@ -22,16 +22,18 @@ class ApiDetailViewModel(
     val path = checkNotNull(savedStateHandle.get<String>("path"))
     val code = checkNotNull(savedStateHandle.get<Int>("code"))
     val body = checkNotNull(savedStateHandle.get<String>("body"))
+    val duration = checkNotNull(savedStateHandle.get<Long>("duration"))
 
     var close = MutableSharedFlow<Unit>()
         private set
 
     fun onClickSave(
         code: Int,
-        body: String
+        body: String,
+        duration: Long
     ) {
         val key = CachedKey(method, path)
-        val response = CachedResponse(code, body)
+        val response = CachedResponse(code, body, duration)
         repo.mock(key, response)
         viewModelScope.launch { close.emit(Unit) }
     }
