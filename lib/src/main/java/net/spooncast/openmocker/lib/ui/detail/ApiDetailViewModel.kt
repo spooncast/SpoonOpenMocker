@@ -27,8 +27,6 @@ class ApiDetailViewModel(
         private set
 
     fun onClickSave(
-        method: String,
-        path: String,
         code: Int,
         body: String
     ) {

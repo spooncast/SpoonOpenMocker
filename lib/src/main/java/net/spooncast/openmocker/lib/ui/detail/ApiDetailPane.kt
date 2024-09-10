@@ -45,58 +45,56 @@ fun ApiDetailPane(
     vm: ApiDetailViewModel,
     onBackPressed: () -> Unit
 ) {
+    var updatedCode by remember { mutableIntStateOf(vm.code) }
+    var updatedBody by remember { mutableStateOf(vm.body) }
+
     LaunchedEffect(key1 = Unit) {
         vm.close.collect { onBackPressed() }
     }
-
-    Pane(
-        method = vm.method,
-        path = vm.path,
-        code = vm.code,
-        body = vm.body,
-        onBackPressed = onBackPressed,
-        onClickSave = vm::onClickSave
-    )
-}
-
-@Composable
-private fun Pane(
-    method: String,
-    path: String,
-    code: Int,
-    body: String,
-    onBackPressed: () -> Unit,
-    onClickSave: (String, String, Int, String) -> Unit,
-) {
-    var updatedCode by remember { mutableIntStateOf(code) }
-    var updatedBody by remember { mutableStateOf(body) }
 
     Scaffold(
         topBar = {
             DetailTopBar(
                 onBackPressed = onBackPressed,
-                onClickSave = { onClickSave(method, path, updatedCode, updatedBody) }
+                onClickSave = { vm.onClickSave(updatedCode, updatedBody) }
             )
         }
     ) {
-        Column(
+        Pane(
+            code = updatedCode,
+            body = updatedBody,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .padding(15.dp)
-        ) {
-            UpdateResponseCodeArea(
-                updatedCode = updatedCode,
-                onUpdateCode = { updatedCode = it}
-            )
-            VerticalSpacer(size = 15.dp)
-            UpdateResponseBodyArea(
-                updatedCode = updatedCode,
-                updatedBody = updatedBody,
-                modifier = Modifier.weight(1F, true),
-                onUpdateBody = { updatedBody = it }
-            )
-        }
+                .padding(15.dp),
+            onUpdateCode = { code -> updatedCode = code },
+            onUpdateBody = { body -> updatedBody = body }
+        )
+    }
+}
+
+@Composable
+private fun Pane(
+    code: Int,
+    body: String,
+    modifier: Modifier = Modifier,
+    onUpdateCode: (Int) -> Unit,
+    onUpdateBody: (String) -> Unit
+) {
+    Column(
+        modifier = modifier
+    ) {
+        UpdateResponseCodeArea(
+            updatedCode = code,
+            onUpdateCode = onUpdateCode
+        )
+        VerticalSpacer(size = 15.dp)
+        UpdateResponseBodyArea(
+            updatedCode = code,
+            updatedBody = body,
+            modifier = Modifier.weight(1F, true),
+            onUpdateBody = onUpdateBody
+        )
     }
 }
 
@@ -232,12 +230,13 @@ private fun PreviewPane() {
     """.trimIndent()
     MaterialTheme {
         Pane(
-            method = "GET",
-            path = "/api/test",
             code = 401,
             body = body,
-            onBackPressed = {},
-            onClickSave = { _, _, _, _ -> }
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp),
+            onUpdateCode = {},
+            onUpdateBody = {},
         )
     }
 }
