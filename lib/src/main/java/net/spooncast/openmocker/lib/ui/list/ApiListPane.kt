@@ -17,8 +17,9 @@ import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.R
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedValue
+import net.spooncast.openmocker.lib.ui.common.ApiItem
 import net.spooncast.openmocker.lib.ui.common.TopBar
-import net.spooncast.openmocker.lib.ui.list.component.ApiItem
+import net.spooncast.openmocker.lib.ui.list.component.ApiItemLegacy
 import net.spooncast.openmocker.lib.ui.list.dialog.ApiListDialogState
 import net.spooncast.openmocker.lib.ui.list.dialog.UnMockDialog
 
@@ -78,7 +79,7 @@ private fun Pane(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         itemsIndexed(items) { index, (key, value) ->
-            ApiItem(
+            ApiItemLegacy(
                 index = index + 1,
                 key = key,
                 value = value,

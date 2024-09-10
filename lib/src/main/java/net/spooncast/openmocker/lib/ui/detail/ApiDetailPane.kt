@@ -35,11 +35,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.R
-import net.spooncast.openmocker.lib.ui.common.HorizontalSpacer
+import net.spooncast.openmocker.lib.ui.common.ApiItem
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.TopBar
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
-import net.spooncast.openmocker.lib.ui.detail.component.MethodChip
 
 private val successCodes = listOf(200, 201, 202)
 private val failureCodes = listOf(400, 401, 403, 404, 500)
@@ -98,7 +97,7 @@ private fun Pane(
     Column(
         modifier = modifier
     ) {
-        DetailHeader(
+        ApiItem(
             method = method,
             path = path
         )
@@ -140,29 +139,6 @@ private fun DetailTopBar(
             )
         }
     )
-}
-
-@Composable
-private fun DetailHeader(
-    method: String,
-    path: String,
-    modifier: Modifier = Modifier
-) {
-    var lineCnt by remember { mutableIntStateOf(1) }
-    val alignment = if (lineCnt == 1) Alignment.CenterVertically else Alignment.Top
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = alignment
-    ) {
-        MethodChip(method = method)
-        HorizontalSpacer(size = 15.dp)
-        Text(
-            text = path,
-            onTextLayout = { result -> lineCnt = result.lineCount },
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
 }
 
 @Composable

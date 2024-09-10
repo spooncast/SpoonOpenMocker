@@ -26,7 +26,7 @@ import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ApiItem(
+fun ApiItemLegacy(
     index: Int,
     key: CachedKey,
     value: CachedValue,
@@ -70,13 +70,13 @@ fun ApiItem(
 
 @PreviewWithCondition
 @Composable
-private fun PreviewApiItem() {
+private fun PreviewApiItemLegacy() {
     val response = CachedResponse(200, "")
     val mocked = CachedResponse(401, "")
 
     MaterialTheme {
         Column {
-            ApiItem(
+            ApiItemLegacy(
                 index = 1,
                 key = CachedKey(
                     method = "GET",
@@ -88,7 +88,7 @@ private fun PreviewApiItem() {
                 onClick = {},
                 onLongClick = {}
             )
-            ApiItem(
+            ApiItemLegacy(
                 index = 1,
                 key = CachedKey(
                     method = "GET",
