@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +43,7 @@ import net.spooncast.openmocker.lib.ui.detail.component.MethodChip
 
 private val successCodes = listOf(200, 201, 202)
 private val failureCodes = listOf(400, 401, 403, 404, 500)
+private val durations = listOf(0L, 1_000L, 3_000L, 5_000L, 10_000L)
 
 @Composable
 fun ApiDetailPane(
@@ -50,6 +52,7 @@ fun ApiDetailPane(
 ) {
     var updatedCode by remember { mutableIntStateOf(vm.code) }
     var updatedBody by remember { mutableStateOf(vm.body) }
+    var updatedDuration by remember { mutableLongStateOf(vm.duration) }
 
     LaunchedEffect(key1 = Unit) {
         vm.close.collect { onBackPressed() }
@@ -59,7 +62,7 @@ fun ApiDetailPane(
         topBar = {
             DetailTopBar(
                 onBackPressed = onBackPressed,
-                onClickSave = { vm.onClickSave(updatedCode, updatedBody) }
+                onClickSave = { vm.onClickSave(updatedCode, updatedBody, updatedDuration) }
             )
         }
     ) {
@@ -68,12 +71,14 @@ fun ApiDetailPane(
             path = vm.path,
             code = updatedCode,
             body = updatedBody,
+            duration = updatedDuration,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
                 .padding(15.dp),
             onUpdateCode = { code -> updatedCode = code },
-            onUpdateBody = { body -> updatedBody = body }
+            onUpdateBody = { body -> updatedBody = body },
+            onUpdateDuration = { duration -> updatedDuration = duration }
         )
     }
 }
@@ -84,9 +89,11 @@ private fun Pane(
     path: String,
     code: Int,
     body: String,
+    duration: Long,
     modifier: Modifier = Modifier,
     onUpdateCode: (Int) -> Unit,
-    onUpdateBody: (String) -> Unit
+    onUpdateBody: (String) -> Unit,
+    onUpdateDuration: (Long) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -99,6 +106,11 @@ private fun Pane(
         UpdateResponseCodeArea(
             updatedCode = code,
             onUpdateCode = onUpdateCode
+        )
+        VerticalSpacer(size = 15.dp)
+        UpdateDurationArea(
+            duration = duration,
+            onUpdate = onUpdateDuration
         )
         VerticalSpacer(size = 15.dp)
         UpdateResponseBodyArea(
@@ -215,6 +227,67 @@ private fun UpdateResponseCodeArea(
 }
 
 @Composable
+private fun UpdateDurationArea(
+    duration: Long,
+    modifier: Modifier = Modifier,
+    onUpdate: (Long) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(id = R.string.update_duration),
+            modifier = Modifier.weight(1F, true),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Box(
+            modifier = Modifier
+                .weight(1F, true)
+                .height(30.dp)
+                .clickable { expanded = true },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "${duration}",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    contentDescription = null
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                durations.forEach { duration ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "${duration} ms",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        },
+                        onClick = {
+                            onUpdate(duration)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun UpdateResponseBodyArea(
     updatedCode: Int,
     updatedBody: String,
@@ -268,13 +341,15 @@ private fun PreviewPane() {
         Pane(
             method = "GET",
             path = "/weather?lat=44.34&lon=10.99&appId=12341234123412341234",
-            code = 401,
+            code = 200,
             body = body,
+            duration = 0L,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(15.dp),
             onUpdateCode = {},
             onUpdateBody = {},
+            onUpdateDuration = {}
         )
     }
 }
