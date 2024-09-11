@@ -26,14 +26,18 @@ object OpenMocker {
         context.startActivity(intent)
     }
 
-    fun notify(activity: Activity) {
+    fun showNotification(activity: Activity) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
         }
 
         createNotificationChannel(activity)
         val notification = createNotification(activity)
-        NotificationManagerCompat.from(activity).notify(20240911, notification)
+        NotificationManagerCompat.from(activity).notify(NOTIFICATION_ID, notification)
+    }
+
+    fun hideNotification(activity: Activity) {
+        NotificationManagerCompat.from(activity).cancel(NOTIFICATION_ID)
     }
 
     private fun createNotificationChannel(activity: Activity) {
@@ -54,4 +58,5 @@ object OpenMocker {
     }
 
     private const val NOTIFICATION_CHANNEL_ID = "open-mocker-channel"
+    private const val NOTIFICATION_ID = 20240911
 }
