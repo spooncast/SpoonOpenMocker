@@ -53,7 +53,7 @@ internal class MemCacheRepoImpl private constructor(): CacheRepo {
     }
 
     companion object {
-        private const val MAX_BYTE_COUNT = 2048L
+        private const val MAX_BYTE_COUNT = 10240L
 
         @Volatile
         private var instance: MemCacheRepoImpl? = null
