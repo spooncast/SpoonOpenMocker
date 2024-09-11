@@ -1,43 +1,41 @@
 package net.spooncast.openmocker.lib.ui.list.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.model.CachedValue
+import net.spooncast.openmocker.lib.ui.common.ApiItem
 import net.spooncast.openmocker.lib.ui.common.PreviewWithCondition
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ApiItem(
-    index: Int,
+fun ApiItemWithStatus(
     key: CachedKey,
     value: CachedValue,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
-    val isMocking = value.mock != null
-    val code = value.mock?.code ?: value.response.code
+    val codeColor = if (value.isCodeMocked) Color.Red else Color.Black
+    val durationColor = if (value.isDurationMocked) Color.Red else Color.Black
+    val bodyColor = if (value.isBodyMocked) Color.Red else Color.Black
 
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .combinedClickable(
@@ -45,42 +43,54 @@ fun ApiItem(
                 onClick = onClick
             )
             .padding(horizontal = 15.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "${index}")
-        Column(
-            modifier = Modifier.weight(1F, true)
+        ApiItem(
+            method = key.method,
+            path = key.path
+        )
+        VerticalSpacer(size = 10.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = key.method)
-            VerticalSpacer(size = 5.dp)
             Text(
-                text = key.path,
-                modifier = Modifier.basicMarquee()
+                text = "${value.code}",
+                modifier = Modifier.weight(1F, true),
+                color = codeColor,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "${value.duration} ms",
+                modifier = Modifier.weight(1F, true),
+                color = durationColor,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "body",
+                modifier = Modifier.weight(1F, true),
+                color = bodyColor,
+                textAlign = TextAlign.Center
             )
         }
-        Text(text = "${code}")
-        Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = "",
-            tint = if (isMocking) Color.Green else Color.LightGray
+        HorizontalDivider(
+            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
+            thickness = (0.1).dp,
+            color = Color.Black
         )
     }
 }
 
 @PreviewWithCondition
 @Composable
-private fun PreviewApiItem() {
+private fun PreviewApiItemLegacy() {
     val response = CachedResponse(200, "")
     val mocked = CachedResponse(401, "")
 
     MaterialTheme {
         Column {
-            ApiItem(
-                index = 1,
+            ApiItemWithStatus(
                 key = CachedKey(
                     method = "GET",
-                    path = "/mock/1234",
+                    path = "/mock/1234asdfasfasdfasdfasdfasdfasdfasfasdfasdfasdfasdfasd",
                 ),
                 value = CachedValue(
                     response = response
@@ -88,8 +98,7 @@ private fun PreviewApiItem() {
                 onClick = {},
                 onLongClick = {}
             )
-            ApiItem(
-                index = 1,
+            ApiItemWithStatus(
                 key = CachedKey(
                     method = "GET",
                     path = "/mock/1234",

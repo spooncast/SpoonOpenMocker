@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,7 +18,7 @@ import net.spooncast.openmocker.lib.R
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.ui.common.TopBar
-import net.spooncast.openmocker.lib.ui.list.component.ApiItem
+import net.spooncast.openmocker.lib.ui.list.component.ApiItemWithStatus
 import net.spooncast.openmocker.lib.ui.list.dialog.ApiListDialogState
 import net.spooncast.openmocker.lib.ui.list.dialog.UnMockDialog
 
@@ -45,7 +45,7 @@ fun ApiListPane(
                 onBackPressed = onBackPressed,
                 actions = {
                     Text(
-                        text = stringResource(id = R.string.release_all_mocking),
+                        text = stringResource(id = R.string.common_clear),
                         modifier = Modifier
                             .clip(CircleShape)
                             .clickable(onClick = vm::onClickClearAll)
@@ -77,9 +77,8 @@ private fun Pane(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        itemsIndexed(items) { index, (key, value) ->
-            ApiItem(
-                index = index + 1,
+        items(items) { (key, value) ->
+            ApiItemWithStatus(
                 key = key,
                 value = value,
                 onClick = { onClick(key, value) },
