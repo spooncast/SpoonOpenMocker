@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ApiItem(
+internal fun ApiItem(
     method: String,
     path: String,
     modifier: Modifier = Modifier

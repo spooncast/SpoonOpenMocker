@@ -20,8 +20,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import net.spooncast.openmocker.demo.ui.common.VerticalSpacer
 import net.spooncast.openmocker.lib.OpenMocker
-import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
 @Composable
 fun WeatherPane(

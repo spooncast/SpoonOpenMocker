@@ -17,7 +17,7 @@ import net.spooncast.openmocker.lib.ui.common.TwoButtons
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
 @Composable
-fun UnMockDialog(
+internal fun UnMockDialog(
     onDismiss: () -> Unit,
     onClickOk: () -> Unit
 ) {

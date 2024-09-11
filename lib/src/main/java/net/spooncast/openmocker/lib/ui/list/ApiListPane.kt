@@ -23,7 +23,7 @@ import net.spooncast.openmocker.lib.ui.list.dialog.ApiListDialogState
 import net.spooncast.openmocker.lib.ui.list.dialog.UnMockDialog
 
 @Composable
-fun ApiListPane(
+internal fun ApiListPane(
     vm: ApiListViewModel,
     onBackPressed: () -> Unit,
     onClickDetail: (CachedKey, CachedValue) -> Unit

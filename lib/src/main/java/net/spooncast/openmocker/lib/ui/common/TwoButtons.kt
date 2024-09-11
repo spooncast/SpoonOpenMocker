@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.lib.R
 
 @Composable
-fun TwoButtons(
+internal fun TwoButtons(
     modifier: Modifier = Modifier,
     onClickCancel: () -> Unit,
     onClickOk: () -> Unit

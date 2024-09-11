@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.ui.common
+package net.spooncast.openmocker.demo.ui.common
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -8,11 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 
 @Composable
-internal fun VerticalSpacer(size: Dp) {
+fun VerticalSpacer(size: Dp) {
     Spacer(modifier = Modifier.height(size))
 }
 
 @Composable
-internal fun HorizontalSpacer(size: Dp) {
+fun HorizontalSpacer(size: Dp) {
     Spacer(modifier = Modifier.width(size))
 }

@@ -2,7 +2,7 @@ package net.spooncast.openmocker.lib.ui.list.dialog
 
 import net.spooncast.openmocker.lib.model.CachedKey
 
-sealed interface ApiListDialogState {
+internal sealed interface ApiListDialogState {
 
     data object None: ApiListDialogState
 

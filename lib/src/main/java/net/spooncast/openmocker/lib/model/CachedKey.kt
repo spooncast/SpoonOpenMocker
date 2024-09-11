@@ -3,7 +3,7 @@ package net.spooncast.openmocker.lib.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CachedKey(
+internal data class CachedKey(
     val method: String,
     val path: String
 )

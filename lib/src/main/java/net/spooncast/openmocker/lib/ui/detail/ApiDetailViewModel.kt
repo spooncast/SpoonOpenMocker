@@ -13,7 +13,7 @@ import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.repo.CacheRepo
 
-class ApiDetailViewModel(
+internal class ApiDetailViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val repo: CacheRepo
 ): ViewModel() {
