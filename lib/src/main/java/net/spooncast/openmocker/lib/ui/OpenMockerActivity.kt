@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 class OpenMockerActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             MaterialTheme {
                 OpenMockerApp()
