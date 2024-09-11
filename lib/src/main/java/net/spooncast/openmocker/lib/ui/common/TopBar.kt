@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(
+internal fun TopBar(
     title: String,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,

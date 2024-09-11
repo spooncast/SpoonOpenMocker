@@ -10,7 +10,7 @@ import okhttp3.Request
 import okhttp3.Response
 import kotlin.concurrent.Volatile
 
-class MemCacheRepoImpl private constructor(): CacheRepo {
+internal class MemCacheRepoImpl private constructor(): CacheRepo {
 
     private val gson by lazy { GsonBuilder().setPrettyPrinting().create() }
 

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import net.spooncast.openmocker.demo.model.RespWeather
-import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
+import net.spooncast.openmocker.demo.ui.common.VerticalSpacer
 
 @Composable
 fun WeatherDetail(

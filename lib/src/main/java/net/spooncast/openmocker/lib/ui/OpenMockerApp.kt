@@ -18,7 +18,7 @@ import net.spooncast.openmocker.lib.ui.detail.ApiDetailViewModel
 import net.spooncast.openmocker.lib.ui.list.ApiListPane
 import net.spooncast.openmocker.lib.ui.list.ApiListViewModel
 
-sealed interface Destination {
+internal sealed interface Destination {
     @Serializable
     object List
 
@@ -34,7 +34,7 @@ sealed interface Destination {
 }
 
 @Composable
-fun OpenMockerApp() {
+internal fun OpenMockerApp() {
     val context = LocalContext.current
     val navController = rememberNavController()
 

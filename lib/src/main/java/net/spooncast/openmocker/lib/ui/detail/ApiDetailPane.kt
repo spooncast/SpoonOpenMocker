@@ -45,7 +45,7 @@ private val failureCodes = listOf(400, 401, 403, 404, 500)
 private val durations = listOf(0L, 1_000L, 3_000L, 5_000L, 10_000L)
 
 @Composable
-fun ApiDetailPane(
+internal fun ApiDetailPane(
     vm: ApiDetailViewModel,
     onBackPressed: () -> Unit
 ) {

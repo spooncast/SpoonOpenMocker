@@ -12,7 +12,7 @@ import net.spooncast.openmocker.lib.model.CachedValue
 import net.spooncast.openmocker.lib.repo.CacheRepo
 import net.spooncast.openmocker.lib.ui.list.dialog.ApiListDialogState
 
-class ApiListViewModel(
+internal class ApiListViewModel(
     private val cacheRepo: CacheRepo
 ): ViewModel() {
 

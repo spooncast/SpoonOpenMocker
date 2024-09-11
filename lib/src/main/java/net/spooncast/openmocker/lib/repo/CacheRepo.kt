@@ -6,7 +6,7 @@ import net.spooncast.openmocker.lib.model.CachedValue
 import okhttp3.Request
 import okhttp3.Response
 
-interface CacheRepo {
+internal interface CacheRepo {
     val cachedMap: Map<CachedKey, CachedValue>
 
     fun cache(request: Request, response: Response)

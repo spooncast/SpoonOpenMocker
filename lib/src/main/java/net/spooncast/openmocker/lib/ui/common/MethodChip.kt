@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MethodChip(
+internal fun MethodChip(
     method: String,
     modifier: Modifier = Modifier,
 ) {
