@@ -41,7 +41,13 @@ import net.spooncast.openmocker.lib.ui.common.TopBar
 import net.spooncast.openmocker.lib.ui.common.VerticalSpacer
 
 private val successCodes = listOf(200, 201, 202)
-private val failureCodes = listOf(400, 401, 403, 404, 500)
+private val failureCodes = listOf(
+    400 to R.string.common_response_code_400,
+    401 to R.string.common_response_code_401,
+    403 to R.string.common_response_code_403,
+    404 to R.string.common_response_code_404,
+    500 to R.string.common_response_code_500
+)
 private val durations = listOf(0L, 1_000L, 3_000L, 5_000L, 10_000L)
 
 @Composable
@@ -181,20 +187,35 @@ private fun UpdateResponseCodeArea(
             }
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.padding(horizontal = 5.dp)
             ) {
-                (successCodes + failureCodes).forEach { code ->
+                successCodes.forEach { code ->
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "${code}",
+                                text = "${code} (${stringResource(id = R.string.common_success)})",
                                 style = MaterialTheme.typography.titleMedium
                             )
                         },
                         onClick = {
                             onUpdateCode(code)
                             expanded = false
+                        }
+                    )
+                }
+                failureCodes.forEach { (code, stringResId) ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "${code} (${stringResource(id = stringResId)})",
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         },
+                        onClick = {
+                            onUpdateCode(code)
+                            expanded = false
+                        }
                     )
                 }
             }

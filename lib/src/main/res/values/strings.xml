@@ -7,6 +7,12 @@
     <string name="common_cancel">Cancel</string>
     <string name="common_save">Save</string>
     <string name="common_clear">Clear</string>
+    <string name="common_success">Success</string>
+    <string name="common_response_code_400">Bad Request</string>
+    <string name="common_response_code_401">Unauthorized</string>
+    <string name="common_response_code_403">Forbidden</string>
+    <string name="common_response_code_404">Not Found</string>
+    <string name="common_response_code_500">Internal Server Error</string>
 
     <!--List-->
     <string name="title_api_list">API List</string>
