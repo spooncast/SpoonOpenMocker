@@ -39,6 +39,7 @@ internal fun ApiItemWithStatus(
             .fillMaxWidth()
             .combinedClickable(
                 onLongClick = onLongClick,
+                onDoubleClick = { /* Do not handle */ },
                 onClick = onClick
             )
             .padding(horizontal = 15.dp, vertical = 10.dp),
