@@ -21,7 +21,7 @@ internal class MemCacheRepoImpl private constructor(): CacheRepo {
         val key = CachedKey(request.method, request.url.encodedPath)
 
         val body = runCatching {
-            val bodyString = response.peekBody(MAX_BYTE_COUNT).string()
+            val bodyString = response.peekBody(Long.MAX_VALUE).string()
             val jsonElement = JsonParser.parseString(bodyString)
             gson.toJson(jsonElement)
         }.getOrDefault("")
@@ -53,8 +53,6 @@ internal class MemCacheRepoImpl private constructor(): CacheRepo {
     }
 
     companion object {
-        private const val MAX_BYTE_COUNT = 10240L
-
         @Volatile
         private var instance: MemCacheRepoImpl? = null
 
