@@ -300,27 +300,13 @@ private fun UpdateResponseBodyArea(
         )
         VerticalSpacer(size = 15.dp)
 
-        if (updatedCode in successCodes) {
-            TextField(
-                value = updatedBody,
-                onValueChange = onUpdateBody,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1F, true),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(id = R.string.update_restrictions),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+        TextField(
+            value = updatedBody,
+            onValueChange = onUpdateBody,
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+        )
     }
 }
 
