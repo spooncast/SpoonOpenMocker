@@ -31,10 +31,7 @@ class OpenMockerInterceptor private constructor(
 
         val response = chain.proceed(request)
 
-        // 성공한 요청에 대해서만 caching을 수행한다.
-        if (response.isSuccessful) {
-            cacheRepo.cache(request, response)
-        }
+        cacheRepo.cache(request, response)
 
         return response
     }
