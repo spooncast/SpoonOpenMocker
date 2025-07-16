@@ -81,7 +81,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "net.spooncast"
             artifactId = "openmocker"
-            version = "0.0.11"
+            version = "0.0.12"
 
             afterEvaluate {
                 from(components["release"])
