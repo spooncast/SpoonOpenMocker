@@ -7,6 +7,7 @@
         <activity
             android:name=".ui.OpenMockerActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.NoTitleBar" />
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>
