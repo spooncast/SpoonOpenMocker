@@ -11,7 +11,7 @@ hilt = "2.57.1"
 hiltAndroidX = "1.2.0"
 okhttp3 = "5.1.0"
 retrofit = "3.0.0"
-navigationCompose = "2.8.0-rc01"
+navigationCompose = "2.9.3"
 serializationJson = "1.9.0"
 gson = "2.13.1"
 
