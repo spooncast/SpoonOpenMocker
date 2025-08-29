@@ -15,7 +15,7 @@ class OpenMockerInterceptor private constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        val mock = cacheRepo.getMock(request)
+        val mock = cacheRepo.getMock(request.method, request.url.encodedPath)
 
         if (mock != null) {
             runBlocking { delay(mock.duration) }
@@ -30,8 +30,12 @@ class OpenMockerInterceptor private constructor(
         }
 
         val response = chain.proceed(request)
-
-        cacheRepo.cache(request, response)
+        cacheRepo.cache(
+            method = request.method,
+            urlPath = request.url.encodedPath,
+            responseCode = response.code,
+            responseBody = response.peekBody(Long.MAX_VALUE).string(),
+        )
 
         return response
     }
