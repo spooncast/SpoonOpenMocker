@@ -6,8 +6,6 @@ import com.google.gson.JsonParser
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.model.CachedValue
-import okhttp3.Request
-import okhttp3.Response
 import kotlin.concurrent.Volatile
 
 internal class MemCacheRepoImpl private constructor(): CacheRepo {
@@ -17,15 +15,19 @@ internal class MemCacheRepoImpl private constructor(): CacheRepo {
     private val _cachedMap = mutableStateMapOf<CachedKey, CachedValue>()
     override val cachedMap: Map<CachedKey, CachedValue> get() = _cachedMap
 
-    override fun cache(request: Request, response: Response) {
-        val key = CachedKey(request.method, request.url.encodedPath)
+    override fun cache(
+        method: String,
+        urlPath: String,
+        responseCode: Int,
+        responseBody: String
+    ) {
+        val key = CachedKey(method, urlPath)
 
         val body = runCatching {
-            val bodyString = response.peekBody(Long.MAX_VALUE).string()
-            val jsonElement = JsonParser.parseString(bodyString)
+            val jsonElement = JsonParser.parseString(responseBody)
             gson.toJson(jsonElement)
         }.getOrDefault("")
-        val cachedResponse = CachedResponse(response.code, body)
+        val cachedResponse = CachedResponse(responseCode, body)
 
         _cachedMap[key] = CachedValue(response = cachedResponse)
     }
@@ -34,8 +36,8 @@ internal class MemCacheRepoImpl private constructor(): CacheRepo {
         _cachedMap.clear()
     }
 
-    override fun getMock(request: Request): CachedResponse? {
-        val key = CachedKey(request.method, request.url.encodedPath)
+    override fun getMock(method: String, urlPath: String): CachedResponse? {
+        val key = CachedKey(method, urlPath)
         val value = _cachedMap[key] ?: return null
         return value.mock
     }
