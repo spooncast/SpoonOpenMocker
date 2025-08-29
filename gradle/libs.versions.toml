@@ -1,15 +1,14 @@
 [versions]
-agp = "8.5.0"
-kotlin = "2.0.0"
+agp = "8.12.2"
+kotlin = "2.2.10"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
-espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.1"
-composeBom = "2024.04.01"
-hilt = "2.51.1"
-hiltAndroidX = "1.0.0"
+composeBom = "2025.08.01"
+hilt = "2.57.1"
+hiltAndroidX = "1.2.0"
 okhttp3 = "4.12.0"
 retrofit = "2.11.0"
 navigationCompose = "2.8.0-rc01"
@@ -20,7 +19,6 @@ gson = "2.11.0"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
