@@ -22,4 +22,3 @@ dependencyResolutionManagement {
 rootProject.name = "OpenMocker"
 include(":app")
 include(":lib")
-include(":core")
