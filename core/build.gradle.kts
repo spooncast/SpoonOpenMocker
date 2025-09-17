@@ -16,6 +16,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 dependencies {
     implementation(libs.jetbrains.kotlinx.serialization.json)
+    implementation(libs.jetbrains.kotlinx.coroutines.core)
 
     testImplementation(libs.junit)
+    testImplementation(libs.jetbrains.kotlinx.coroutines.test)
 }
