@@ -34,19 +34,21 @@ class KtorMockerEngine(
      * This method is called by the OpenMocker plugin during request processing
      * to determine if a mock response is configured for the current request.
      *
+     * Performance: O(1) lookup time using key-based repository access.
+     * Thread Safety: Repository operations are thread-safe.
+     *
      * @param method HTTP method (GET, POST, etc.)
      * @param path URL path without query parameters
      * @return MockResponse if a mock is configured, null otherwise
      */
     override suspend fun shouldMock(method: String, path: String): MockResponse? {
-        // TODO: Implement mock lookup logic
-        // This should:
-        // 1. Create a MockKey from method and path
-        // 2. Query the repository for an active mock
-        // 3. Return the MockResponse if found, null otherwise
-
-        val key = MockKey(method, path)
-        return repository.getMock(key)
+        return try {
+            val key = MockKey(method, path)
+            repository.getMock(key)
+        } catch (e: Exception) {
+            // Log error in production; return null to proceed with real request
+            null
+        }
     }
 
     /**
@@ -55,42 +57,49 @@ class KtorMockerEngine(
      * This method is called by the OpenMocker plugin after successful HTTP responses
      * to store them for potential future mocking through the UI or programmatic API.
      *
+     * Memory Efficiency: Stores only essential response data (code, body, delay).
+     * Thread Safety: Repository operations are thread-safe.
+     *
      * @param method HTTP method
      * @param path URL path
      * @param code HTTP status code
      * @param body Response body as string
      */
     override suspend fun cacheResponse(method: String, path: String, code: Int, body: String) {
-        // TODO: Implement response caching logic
-        // This should:
-        // 1. Create a MockKey from method and path
-        // 2. Create a MockResponse from code, body, and default delay
-        // 3. Store the cached response in the repository
-
-        val key = MockKey(method, path)
-        val response = MockResponse(code = code, body = body, delay = 0L)
-        repository.cacheRealResponse(key, response)
+        try {
+            val key = MockKey(method, path)
+            val response = MockResponse(code = code, body = body, delay = 0L)
+            repository.cacheRealResponse(key, response)
+        } catch (e: Exception) {
+            // Log error in production; continue execution without caching
+            // Caching failures should not affect normal operation
+        }
     }
 
     /**
      * Enables mocking for the specified request with the given response.
+     *
+     * Once a mock is enabled, subsequent requests matching the mock key will return
+     * the specified mock response instead of making actual HTTP calls.
+     *
+     * Validation: Validates parameters before storage.
+     * Atomicity: Mock is either fully saved or operation fails.
      *
      * @param key MockKey identifying the request
      * @param response MockResponse to return for matching requests
      * @return true if mock was successfully enabled, false otherwise
      */
     override suspend fun mock(key: MockKey, response: MockResponse): Boolean {
-        // TODO: Implement mock enabling logic
-        // This should:
-        // 1. Validate the key and response parameters
-        // 2. Store the mock configuration in the repository
-        // 3. Return success status
-
         return try {
+            // Validate parameters
+            require(key.method.isNotBlank()) { "Mock key method cannot be blank" }
+            require(key.path.isNotBlank()) { "Mock key path cannot be blank" }
+            require(response.code in 100..599) { "Response code must be valid HTTP status code" }
+
             repository.saveMock(key, response)
             true
         } catch (e: Exception) {
-            // Log error in real implementation
+            // Log error in production; return false to indicate failure
             false
         }
     }
@@ -98,22 +107,75 @@ class KtorMockerEngine(
     /**
      * Disables mocking for the specified request.
      *
+     * After disabling a mock, subsequent requests will proceed with normal HTTP execution
+     * instead of returning the mock response.
+     *
      * @param key MockKey identifying the request to unmock
-     * @return true if mock was successfully disabled, false otherwise
+     * @return true if mock was successfully disabled, false if no mock existed or operation failed
      */
     override suspend fun unmock(key: MockKey): Boolean {
-        // TODO: Implement mock disabling logic
-        // This should:
-        // 1. Validate the key parameter
-        // 2. Remove the mock configuration from the repository
-        // 3. Return success status
-
         return try {
             repository.removeMock(key)
-            true
         } catch (e: Exception) {
-            // Log error in real implementation
+            // Log error in production; return false to indicate failure
             false
+        }
+    }
+
+    /**
+     * Convenience method to create a MockKey from HTTP method and path.
+     *
+     * @param method HTTP method
+     * @param path URL path
+     * @return MockKey for the request
+     */
+    fun createMockKey(method: String, path: String): MockKey {
+        return MockKey(method, path)
+    }
+
+    /**
+     * Retrieves all currently configured mocks.
+     *
+     * Useful for debugging, UI management, and administrative purposes.
+     *
+     * @return Map of all mock keys to their corresponding responses
+     */
+    suspend fun getAllMocks(): Map<MockKey, MockResponse> {
+        return try {
+            repository.getAllMocks()
+        } catch (e: Exception) {
+            // Return empty map on error to avoid breaking client code
+            emptyMap()
+        }
+    }
+
+    /**
+     * Retrieves all cached responses.
+     *
+     * Useful for debugging, UI management, and providing options for mock creation.
+     *
+     * @return Map of all cached response keys to their responses
+     */
+    suspend fun getAllCachedResponses(): Map<MockKey, MockResponse> {
+        return try {
+            repository.getAllCachedResponses()
+        } catch (e: Exception) {
+            // Return empty map on error to avoid breaking client code
+            emptyMap()
+        }
+    }
+
+    /**
+     * Clears all mocks and cached responses.
+     *
+     * This is a destructive operation that cannot be undone.
+     * Useful for testing and cleanup scenarios.
+     */
+    suspend fun clearAll() {
+        try {
+            repository.clearAll()
+        } catch (e: Exception) {
+            // Log error in production; silently handle cleanup failures
         }
     }
 }

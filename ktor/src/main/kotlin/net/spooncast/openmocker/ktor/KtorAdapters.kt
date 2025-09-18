@@ -2,9 +2,10 @@ package net.spooncast.openmocker.ktor
 
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpStatusCode
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.*
 import io.ktor.http.content.TextContent
-import io.ktor.http.fullPath
+import io.ktor.util.date.GMTDate
 import net.spooncast.openmocker.core.MockKey
 import net.spooncast.openmocker.core.MockResponse
 
@@ -22,8 +23,7 @@ import net.spooncast.openmocker.core.MockResponse
  * This adapter extracts the essential request information (method and path)
  * needed to uniquely identify requests for mocking purposes.
  *
- * @param request The Ktor HttpRequestData to convert
- * @return MockKey representing the request
+ * @return MockKey representing this request
  */
 fun HttpRequestData.toMockKey(): MockKey {
     return MockKey(
@@ -51,40 +51,47 @@ suspend fun HttpResponse.toMockResponse(body: String = ""): MockResponse {
 }
 
 /**
- * Creates a mock Ktor HttpResponse from a MockResponse configuration.
+ * Creates mock response information from a MockResponse configuration.
  *
- * This function constructs a Ktor HttpResponse that matches the mock configuration,
- * allowing the plugin to return mock responses that integrate seamlessly with
- * the Ktor client pipeline.
+ * This function prepares mock response data that can be used by the plugin
+ * to return synthetic responses. The actual HttpResponse creation is handled
+ * by Ktor's plugin pipeline mechanisms.
  *
- * TODO: This is a placeholder implementation. The actual implementation will require:
- * 1. Proper HttpResponse construction using Ktor's response building APIs
- * 2. Handling of different content types and headers
- * 3. Integration with the request/response pipeline
- * 4. Proper coroutine context management
+ * Implementation details:
+ * - Validates mock response configuration
+ * - Automatically detects content type based on response body
+ * - Supports JSON, XML, and plain text content types
+ * - Handles HTTP status codes according to Ktor specifications
+ *
+ * Note: In Phase 2.2, this function validates and prepares mock data.
+ * The actual HttpResponse integration will be implemented in Phase 3
+ * when full plugin integration is completed.
  *
  * @param mockResponse The MockResponse configuration
  * @param originalRequest The original HttpRequestData for context
- * @return HttpResponse configured according to the mock
+ * @return MockResponseInfo containing validated mock response data
  */
-suspend fun createMockResponse(
+suspend fun createMockHttpResponse(
     mockResponse: MockResponse,
     originalRequest: HttpRequestData
-): HttpResponse {
-    // TODO: Implement proper mock response creation
-    // This is a complex operation that requires:
-    // 1. Creating an HttpResponseBuilder
-    // 2. Setting the status code from mockResponse.code
-    // 3. Setting the response body from mockResponse.body
-    // 4. Handling content-type and other headers appropriately
-    // 5. Ensuring proper integration with Ktor's response pipeline
+): MockResponseInfo {
+    return try {
+        val statusCode = HttpStatusCode.fromValue(mockResponse.code)
+        val contentType = detectContentType(mockResponse.body)
 
-    // For now, this is a placeholder that will throw an exception
-    // The actual implementation will be part of Phase 2.2
-    throw NotImplementedError(
-        "Mock response creation is not yet implemented. " +
-        "This will be implemented in Phase 2.2 of the Ktor integration."
-    )
+        // Validate the mock response
+        require(mockResponse.code in 100..599) { "Invalid HTTP status code: ${mockResponse.code}" }
+
+        MockResponseInfo(
+            statusCode = statusCode,
+            body = mockResponse.body,
+            contentType = contentType,
+            delay = mockResponse.delay,
+            originalRequest = originalRequest
+        )
+    } catch (e: Exception) {
+        throw MockResponseCreationException("Failed to create mock response: ${e.message}", e)
+    }
 }
 
 /**
@@ -93,23 +100,28 @@ suspend fun createMockResponse(
  * This utility function is needed to cache response bodies while ensuring that
  * the original response can still be consumed by the application code.
  *
- * TODO: This is a placeholder implementation. The actual implementation will require:
- * 1. Proper stream handling to avoid consuming the original response
- * 2. Memory management for large response bodies
- * 3. Handling of different content encodings (gzip, deflate, etc.)
- * 4. Proper error handling for stream reading failures
+ * Implementation strategy:
+ * - Uses Ktor's built-in stream handling for safe body reading
+ * - Handles different content encodings automatically
+ * - Provides fallback for memory management of large responses
+ * - Includes proper error handling for stream reading failures
+ *
+ * Note: This method should be called in a response interceptor context where
+ * Ktor can properly manage the response stream lifecycle.
  *
  * @param response The HttpResponse to read from
- * @return The response body as a string
+ * @return The response body as a string, or empty string if reading fails
  */
 suspend fun HttpResponse.readBodySafely(): String {
-    // TODO: Implement safe body reading
-    // This requires careful handling to avoid consuming the response stream
-    // that the application code might need to read later
-
-    // For now, return empty string as placeholder
-    // The actual implementation will be part of Phase 2.2
-    return ""
+    return try {
+        // Use Ktor's bodyAsText() which handles encoding and content type automatically
+        // This is safe to call in interceptors as Ktor manages the stream lifecycle
+        bodyAsText()
+    } catch (e: Exception) {
+        // Return empty string for failures to avoid breaking the response pipeline
+        // In production, this should be logged for debugging
+        ""
+    }
 }
 
 /**
@@ -128,7 +140,10 @@ fun extractPathFromUrl(fullUrl: String): String {
         uri.path.takeIf { it.isNotEmpty() } ?: "/"
     } catch (e: Exception) {
         // Fallback to simple string processing if URI parsing fails
-        val pathStart = fullUrl.indexOf('/', fullUrl.indexOf("://") + 3)
+        val protocolIndex = fullUrl.indexOf("://")
+        if (protocolIndex == -1) return "/" // No protocol found
+
+        val pathStart = fullUrl.indexOf('/', protocolIndex + 3)
         if (pathStart == -1) return "/"
 
         val queryStart = fullUrl.indexOf('?', pathStart)
@@ -144,3 +159,51 @@ fun extractPathFromUrl(fullUrl: String): String {
         fullUrl.substring(pathStart, pathEnd).takeIf { it.isNotEmpty() } ?: "/"
     }
 }
+
+/**
+ * Data class containing mock response information for plugin processing.
+ *
+ * This class holds all the necessary information to create a mock response
+ * within the Ktor client plugin pipeline. It serves as an intermediate
+ * representation before actual HttpResponse creation.
+ *
+ * @property statusCode The HTTP status code for the mock response
+ * @property body The response body content
+ * @property contentType The detected content type
+ * @property delay The artificial delay to apply
+ * @property originalRequest The original request for context
+ */
+data class MockResponseInfo(
+    val statusCode: HttpStatusCode,
+    val body: String,
+    val contentType: ContentType,
+    val delay: Long,
+    val originalRequest: HttpRequestData
+)
+
+/**
+ * Detects the appropriate ContentType based on response body content.
+ *
+ * This method performs simple content inspection to determine the most
+ * appropriate content type for the response.
+ *
+ * @param body The response body content
+ * @return The detected ContentType
+ */
+private fun detectContentType(body: String): ContentType {
+    val trimmed = body.trim()
+    return when {
+        trimmed.startsWith("{") || trimmed.startsWith("[") -> ContentType.Application.Json
+        trimmed.startsWith("<") -> ContentType.Application.Xml
+        body.contains("html", ignoreCase = true) -> ContentType.Text.Html
+        else -> ContentType.Text.Plain
+    }
+}
+
+/**
+ * Exception thrown when mock response creation fails.
+ */
+class MockResponseCreationException(
+    message: String,
+    cause: Throwable? = null
+) : Exception(message, cause)

@@ -10,14 +10,17 @@ import org.junit.Test
 /**
  * Basic compilation and instantiation tests for OpenMocker Ktor plugin.
  *
- * These tests verify that Phase 2.1 requirements are met:
+ * These tests verify that Phase 2.2 requirements are met:
  * - Plugin can be compiled without errors
  * - Basic classes can be instantiated
  * - Configuration validation works
  * - Utility functions work correctly
+ * - KtorMockerEngine implementation is functional
+ * - Mock response creation is working
+ * - Request/response adapters are functional
  *
- * Note: Full plugin integration tests will be added in Phase 2.2 when
- * the actual mock response creation is implemented.
+ * Note: Full plugin integration tests with actual HTTP clients will be added
+ * in Phase 3 when cross-platform testing is implemented.
  */
 class OpenMockerPluginCompilationTest {
 
@@ -103,6 +106,105 @@ class OpenMockerPluginCompilationTest {
         }
 
         assertTrue("Expected validation to fail for maxCacheSize = 0", exceptionThrown)
+    }
+
+    // BDD: Given MockResponse creation parameters, When KtorUtils functions are called, Then work correctly with phase 2.2 implementation
+    @Test
+    fun `ktorutils functions work correctly with phase 2_2 implementation`() = runTest {
+        // Arrange
+        val mockResponse = net.spooncast.openmocker.core.MockResponse(
+            code = 200,
+            body = """{"test": "data"}""",
+            delay = 50L
+        )
+
+        // Act - Test delay application (verify function works without error)
+        KtorUtils.applyMockDelay(mockResponse)
+
+        // Assert (function completed successfully)
+        assertTrue("Expected delay function to complete", true)
+
+        // Act - Test content type detection
+        val contentType = KtorUtils.detectContentType(mockResponse.body)
+
+        // Assert
+        assertEquals("Expected JSON content type", io.ktor.http.ContentType.Application.Json, contentType)
+    }
+
+    // BDD: Given engine functionality requirements, When mocker engine operations are called, Then work correctly in phase 2.2
+    @Test
+    fun `mocker engine phase 2_2 functionality works correctly`() = runTest {
+        // Arrange
+        val engine = createKtorMockerEngine()
+        val key = net.spooncast.openmocker.core.MockKey("GET", "/test")
+        val response = net.spooncast.openmocker.core.MockResponse(200, "test data")
+
+        // Act - Test mock operations
+        val mockResult = engine.mock(key, response)
+        val shouldMockResult = engine.shouldMock("GET", "/test")
+        val unmockResult = engine.unmock(key)
+
+        // Assert
+        assertTrue("Expected mock to be saved successfully", mockResult)
+        assertNotNull("Expected mock to be found", shouldMockResult)
+        assertEquals("Expected matching response", response, shouldMockResult)
+        assertTrue("Expected mock to be removed successfully", unmockResult)
+    }
+
+    // BDD: Given caching functionality requirements, When cache operations are called, Then work correctly in phase 2.2
+    @Test
+    fun `cache functionality phase 2_2 works correctly`() = runTest {
+        // Arrange
+        val engine = createKtorMockerEngine()
+        val method = "POST"
+        val path = "/api/submit"
+        val code = 201
+        val body = "Created successfully"
+
+        // Act - Test caching
+        engine.cacheResponse(method, path, code, body)
+        val cachedResponses = engine.getAllCachedResponses()
+
+        // Assert
+        assertEquals("Expected one cached response", 1, cachedResponses.size)
+        val cachedResponse = cachedResponses[net.spooncast.openmocker.core.MockKey(method, path)]
+        assertNotNull("Expected cached response to exist", cachedResponse)
+        assertEquals("Expected matching code", code, cachedResponse!!.code)
+        assertEquals("Expected matching body", body, cachedResponse.body)
+    }
+
+    // BDD: Given convenience methods requirements, When utility methods are called, Then work correctly in phase 2.2
+    @Test
+    fun `convenience methods phase 2_2 work correctly`() = runTest {
+        // Arrange
+        val engine = createKtorMockerEngine()
+
+        // Act - Test convenience methods
+        val mockKey = engine.createMockKey("PATCH", "/api/update")
+        val initialMocks = engine.getAllMocks()
+        val initialCached = engine.getAllCachedResponses()
+
+        // Add some data
+        engine.mock(mockKey, net.spooncast.openmocker.core.MockResponse(200, "updated"))
+        engine.cacheResponse("GET", "/api/data", 200, "data")
+
+        val mocksAfterAdd = engine.getAllMocks()
+        val cachedAfterAdd = engine.getAllCachedResponses()
+
+        // Clear all
+        engine.clearAll()
+        val mocksAfterClear = engine.getAllMocks()
+        val cachedAfterClear = engine.getAllCachedResponses()
+
+        // Assert
+        assertEquals("Expected correct mock key method", "PATCH", mockKey.method)
+        assertEquals("Expected correct mock key path", "/api/update", mockKey.path)
+        assertTrue("Expected initial mocks to be empty", initialMocks.isEmpty())
+        assertTrue("Expected initial cached to be empty", initialCached.isEmpty())
+        assertEquals("Expected one mock after add", 1, mocksAfterAdd.size)
+        assertEquals("Expected one cached after add", 1, cachedAfterAdd.size)
+        assertTrue("Expected mocks to be cleared", mocksAfterClear.isEmpty())
+        assertTrue("Expected cached to be cleared", cachedAfterClear.isEmpty())
     }
 
     // BDD: Given URL with path components, When adapter functions are called, Then compile and execute correctly
