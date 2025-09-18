@@ -31,3 +31,8 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# AI
+.claude/
+CLAUDE.md
+CLAUDE_GITHUB_ACTIONS_RULES.md
