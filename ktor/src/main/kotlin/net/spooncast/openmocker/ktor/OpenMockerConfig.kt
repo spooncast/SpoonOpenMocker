@@ -57,9 +57,45 @@ class OpenMockerConfig {
      */
     var autoEnableInDebug: Boolean = false
 
+    /**
+     * Whether to enable request/response logging for debugging purposes.
+     * When enabled, logs will include mock decisions, cache operations,
+     * and performance metrics.
+     * Defaults to false.
+     */
+    var enableLogging: Boolean = false
+
+    /**
+     * Whether to collect performance metrics for mocked vs real requests.
+     * Metrics include request counts, mocking ratios, and timing information.
+     * Defaults to false.
+     */
+    var metricsEnabled: Boolean = false
+
+    /**
+     * Log level for OpenMocker operations.
+     * Controls the verbosity of logging output when enableLogging is true.
+     *
+     * Available levels:
+     * - DEBUG: Detailed information for debugging
+     * - INFO: General information about mock operations
+     * - WARN: Warning messages for potential issues
+     * - ERROR: Error messages for failures only
+     *
+     * Defaults to INFO.
+     */
+    var logLevel: LogLevel = LogLevel.INFO
+
     internal fun validate() {
         require(maxCacheSize == -1 || maxCacheSize > 0) {
             "maxCacheSize must be either -1 (unlimited) or a positive number"
         }
+    }
+
+    /**
+     * Enum representing different log levels for OpenMocker operations.
+     */
+    enum class LogLevel {
+        DEBUG, INFO, WARN, ERROR
     }
 }
