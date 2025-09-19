@@ -69,6 +69,35 @@ internal class MockingEngine<TRequest, TResponse>(
     }
 
     /**
+     * Gets mock data for the given request without creating the response
+     *
+     * This method provides access to the raw CachedResponse data, including
+     * delay information, allowing clients to handle delay processing optimally
+     * for their execution context (synchronous vs asynchronous).
+     *
+     * @param clientRequest The original client-specific request
+     * @return CachedResponse data if a mock exists, null otherwise
+     */
+    fun getMockData(clientRequest: TRequest): CachedResponse? {
+        val requestData = clientAdapter.extractRequestData(clientRequest)
+        return cacheRepo.getMock(requestData.method, requestData.path)
+    }
+
+    /**
+     * Creates a mock response from cached response data
+     *
+     * This method separates response creation from mock detection,
+     * allowing clients to handle delay processing separately.
+     *
+     * @param clientRequest The original client-specific request
+     * @param cachedResponse The cached response data to use for mocking
+     * @return Client-specific mock response
+     */
+    fun createMockResponse(clientRequest: TRequest, cachedResponse: CachedResponse): TResponse {
+        return clientAdapter.createMockResponse(clientRequest, cachedResponse)
+    }
+
+    /**
      * Synchronous version of checkForMock for clients that don't support coroutines
      *
      * @param clientRequest The original client-specific request
