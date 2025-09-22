@@ -86,6 +86,13 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
+
+    // Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.http)
+    implementation(libs.ktor.utils)
+    implementation(libs.ktor.client.mock)
+    testImplementation(libs.ktor.client.mock)
 }
 
 publishing {
