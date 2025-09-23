@@ -3,6 +3,7 @@ package net.spooncast.openmocker.lib.client.ktor
 import io.ktor.client.plugins.api.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.client.call.*
 import io.ktor.util.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.delay
@@ -15,7 +16,7 @@ import kotlinx.coroutines.delay
  * and cache real responses for future mocking use.
  *
  * Key Features:
- * - HTTP request interception with mock response handling
+ * - HTTP request interception with mock response handling using on(Send) hook
  * - Automatic response caching for development and testing
  * - Network delay simulation for realistic testing scenarios
  * - Runtime enable/disable configuration
@@ -23,7 +24,7 @@ import kotlinx.coroutines.delay
  *
  * Architecture Integration:
  * ```
- * HttpClient + OpenMockerPlugin
+ * HttpClient + OpenMockerPlugin (on Send hook)
  *         ↓
  * KtorAdapter (HttpRequestData ↔ HttpResponse)
  *         ↓
@@ -43,25 +44,71 @@ import kotlinx.coroutines.delay
  */
 val OpenMockerPlugin = createClientPlugin("OpenMocker", ::OpenMockerPluginConfig) {
     /**
-     * Basic plugin structure for OpenMocker Ktor integration
+     * OpenMocker Ktor plugin implementation using on(Send) hook
      *
-     * This creates a foundation for HTTP mocking in Ktor clients.
-     * The actual mocking and caching logic will be implemented in the test coverage
-     * phase to ensure proper integration with the MockingEngine.
+     * This plugin intercepts HTTP requests before they are sent over the network.
+     * When a mock response is available, it bypasses the network call and returns
+     * the mock response with optional delay simulation. When no mock is available,
+     * it proceeds with the normal network call and caches the response for future use.
      *
-     * Current limitations:
-     * - Response caching requires type conversion between HttpRequest and HttpRequestData
-     * - Request mocking requires intercepting the request pipeline before network calls
-     * - Both features need proper integration with the existing KtorAdapter
+     * The implementation follows the same pattern as OpenMockerInterceptor but adapted
+     * for Ktor's asynchronous nature and plugin architecture.
      */
-    onResponse { response ->
-        // Plugin is installed and configured
-        // Response handling and caching will be implemented with proper type conversion
-        if (this@createClientPlugin.pluginConfig.enabled) {
-            // TODO: Implement response caching with proper HttpRequest to HttpRequestData conversion
-            // this.pluginConfig.mockingEngine.cacheResponse(requestData, response)
+    on(Send) { requestBuilder ->
+        val config = pluginConfig
+
+        // Check if plugin is enabled
+        if (!config.enabled) {
+            return@on proceed(requestBuilder)
         }
+
+        // Convert HttpRequestBuilder to HttpRequestData
+        val requestData = requestBuilder.build()
+
+        // Check for mock data using MockingEngine abstraction
+        val mockData = config.mockingEngine.getMockData(requestData)
+
+        if (mockData != null) {
+            // Apply delay if configured (Ktor-specific: async delay)
+            if (mockData.duration > 0) {
+                delay(mockData.duration)
+            }
+
+            // Create mock response using MockingEngine abstraction
+            val mockResponse = config.mockingEngine.createMockResponse(requestData, mockData)
+
+            // Create HttpClientCall wrapper for the mock response
+            return@on createMockCall(requestData, mockResponse)
+        }
+
+        // Proceed with normal network call
+        val originalCall = proceed(requestBuilder)
+
+        // Cache the real response for future mocking
+        config.mockingEngine.cacheResponse(requestData, originalCall.response)
+
+        return@on originalCall
     }
+}
+
+/**
+ * Creates a mock HttpClientCall from a mock response
+ *
+ * This function wraps the mock HttpResponse into a proper HttpClientCall
+ * that can be returned from the on(Send) hook, effectively bypassing
+ * the network call while maintaining the same API contract.
+ *
+ * Since HttpClientCall has complex internal state and we can't easily construct
+ * it directly, we return the existing call from the mock response, which was
+ * already properly constructed by the KtorAdapter.createMockResponse() method.
+ */
+private suspend fun createMockCall(
+    requestData: HttpRequestData,
+    mockResponse: HttpResponse
+): HttpClientCall {
+    // The mockResponse already contains a properly constructed HttpClientCall
+    // from the KtorAdapter.createMockResponse() method, so we can return it directly
+    return mockResponse.call
 }
 
 
