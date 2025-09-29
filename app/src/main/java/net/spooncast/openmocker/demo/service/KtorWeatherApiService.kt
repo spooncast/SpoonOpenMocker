@@ -14,7 +14,7 @@ class KtorWeatherApiService @Inject constructor(
         return client.get("https://api.openweathermap.org/data/2.5/weather") {
             parameter("lat", "44.34")
             parameter("lon", "10.99")
-            parameter("appid", "73c620f0db6d470239900fc66d7e67a4")
+            parameter("appid", "")
         }.body()
     }
 }
