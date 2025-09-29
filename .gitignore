@@ -33,6 +33,6 @@ google-services.json
 *.hprof
 
 # AI
-.claude/
 CLAUDE.md
-CLAUDE_GITHUB_ACTIONS_RULES.md
+TASK.md
+.claude/
