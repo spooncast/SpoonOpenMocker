@@ -1,12 +1,14 @@
 package net.spooncast.openmocker.lib.client.ktor
 
-import io.ktor.client.plugins.api.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.client.call.*
-import io.ktor.util.*
-import io.ktor.utils.io.*
+import io.ktor.client.call.HttpClientCall
+import io.ktor.client.plugins.api.Send
+import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.request.HttpRequestData
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.request
+import io.ktor.utils.io.InternalAPI
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
 
 /**
  * OpenMocker Plugin for Ktor HTTP Client
@@ -42,6 +44,7 @@ import kotlinx.coroutines.delay
  * }
  * ```
  */
+@OptIn(InternalAPI::class)
 val OpenMockerPlugin = createClientPlugin("OpenMocker", ::OpenMockerPluginConfig) {
     /**
      * OpenMocker Ktor plugin implementation using on(Send) hook
@@ -85,9 +88,22 @@ val OpenMockerPlugin = createClientPlugin("OpenMocker", ::OpenMockerPluginConfig
         val originalCall = proceed(requestBuilder)
 
         // Cache the real response for future mocking
-        config.mockingEngine.cacheResponse(requestData, originalCall.response)
-
         return@on originalCall
+    }
+
+    onResponse { response ->
+        val config = this@createClientPlugin.pluginConfig
+
+        val request = HttpRequestData(
+            url = response.request.url,
+            method = response.request.method,
+            headers = response.request.headers,
+            body = response.request.content,
+            executionContext = response.request.coroutineContext.job,
+            attributes = response.request.attributes
+        )
+
+        config.mockingEngine.cacheResponse(request, response)
     }
 }
 

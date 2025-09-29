@@ -2,12 +2,15 @@ package net.spooncast.openmocker.lib.client.ktor
 
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import net.spooncast.openmocker.lib.core.HttpClientAdapter
 import net.spooncast.openmocker.lib.core.HttpRequestData
 import net.spooncast.openmocker.lib.core.HttpResponseData
@@ -56,7 +59,17 @@ internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpReques
             )
         }
 
-        val client = HttpClient(mockEngine)
+        val client = HttpClient(mockEngine) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                    encodeDefaults = false
+                    prettyPrint = true
+                    coerceInputValues = true
+                })
+            }
+        }
 
         return runBlocking {
             val response = client.request {

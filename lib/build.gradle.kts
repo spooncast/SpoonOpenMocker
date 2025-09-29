@@ -92,6 +92,9 @@ dependencies {
     implementation(libs.ktor.http)
     implementation(libs.ktor.utils)
     implementation(libs.ktor.client.mock)
+    implementation(libs.ktor.client.json)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.serialization)
     testImplementation(libs.ktor.client.mock)
 }
 
