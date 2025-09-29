@@ -1,8 +1,8 @@
 package net.spooncast.openmocker.lib.client.okhttp
 
+import net.spooncast.openmocker.lib.core.adapter.OkHttpAdapter
 import net.spooncast.openmocker.lib.model.CachedResponse
 import okhttp3.Headers
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
 import okhttp3.Request

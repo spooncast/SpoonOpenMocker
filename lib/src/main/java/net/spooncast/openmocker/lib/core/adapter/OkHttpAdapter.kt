@@ -1,9 +1,8 @@
-package net.spooncast.openmocker.lib.client.okhttp
+package net.spooncast.openmocker.lib.core.adapter
 
-import net.spooncast.openmocker.lib.core.HttpClientAdapter
-import net.spooncast.openmocker.lib.core.HttpRequestData
-import net.spooncast.openmocker.lib.core.HttpResponseData
 import net.spooncast.openmocker.lib.model.CachedResponse
+import net.spooncast.openmocker.lib.model.HttpRequestData
+import net.spooncast.openmocker.lib.model.HttpResponseData
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
@@ -17,8 +16,6 @@ import okhttp3.ResponseBody.Companion.toResponseBody
  */
 internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
 
-    override val clientType: String = "OkHttp"
-
     /**
      * Extracts client-agnostic request data from OkHttp Request
      */
@@ -29,22 +26,6 @@ internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
             url = clientRequest.url.toString(),
             headers = clientRequest.headers.toMultimap()
         )
-    }
-
-    /**
-     * Creates an OkHttp Response from cached response data
-     *
-     * This method constructs a mock OkHttp Response that matches the original request
-     * but contains the mocked status code, body, and other properties from the cache.
-     */
-    override fun createMockResponse(originalRequest: Request, mockResponse: CachedResponse): Response {
-        return Response.Builder()
-            .protocol(Protocol.HTTP_2)
-            .request(originalRequest)
-            .code(mockResponse.code)
-            .message(MOCKER_MESSAGE)
-            .body(mockResponse.body.toResponseBody())
-            .build()
     }
 
     /**
@@ -68,24 +49,19 @@ internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
     }
 
     /**
-     * Validates if the given objects are OkHttp Request and Response types
+     * Creates an OkHttp Response from cached response data
+     *
+     * This method constructs a mock OkHttp Response that matches the original request
+     * but contains the mocked status code, body, and other properties from the cache.
      */
-    override fun isSupported(request: Any?, response: Any?): Boolean {
-        return request is Request && response is Response
-    }
-
-    /**
-     * Checks if the given request is an OkHttp Request
-     */
-    override fun canHandleRequest(request: Any): Boolean {
-        return request is Request
-    }
-
-    /**
-     * Checks if the given response is an OkHttp Response
-     */
-    override fun canHandleResponse(response: Any): Boolean {
-        return response is Response
+    override fun createMockResponse(originalRequest: Request, mockResponse: CachedResponse): Response {
+        return Response.Builder()
+            .protocol(Protocol.HTTP_2)
+            .request(originalRequest)
+            .code(mockResponse.code)
+            .message(MOCKER_MESSAGE)
+            .body(mockResponse.body.toResponseBody())
+            .build()
     }
 
     companion object {

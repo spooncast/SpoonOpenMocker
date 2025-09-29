@@ -9,8 +9,9 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.test.runTest
 import net.spooncast.openmocker.lib.client.ktor.OpenMockerPlugin
-import net.spooncast.openmocker.lib.client.okhttp.OkHttpAdapter
+import net.spooncast.openmocker.lib.core.adapter.OkHttpAdapter
 import net.spooncast.openmocker.lib.client.okhttp.OpenMockerInterceptor
+import net.spooncast.openmocker.lib.core.adapter.KtorAdapter
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
 import okhttp3.Interceptor
 import okhttp3.Request
@@ -92,7 +93,7 @@ class CrossClientCacheSharingTest {
             cacheRepo.mock(cacheKey, cachedResponse)
 
             // When: Ktor 어댑터로 동일한 요청 데이터 생성
-            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+            val ktorAdapter = KtorAdapter()
             val ktorRequestBuilder = HttpRequestBuilder().apply {
                 method = HttpMethod.Get
                 url("$baseUrl$endpoint1")
@@ -131,7 +132,7 @@ class CrossClientCacheSharingTest {
             cacheRepo.mock(cacheKey, mockErrorResponse)
 
             // When: Ktor 어댑터로 동일한 캐시 접근
-            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+            val ktorAdapter = KtorAdapter()
             val ktorRequestBuilder = HttpRequestBuilder().apply {
                 method = HttpMethod.Get
                 url(testUrl)
@@ -272,7 +273,7 @@ class CrossClientCacheSharingTest {
             assertEquals(testResponse2, cachedMock2?.body)
 
             // And: Ktor 어댑터로 동일한 URL을 사용한 캐시 접근
-            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+            val ktorAdapter = KtorAdapter()
 
             // 동일한 URL 패턴으로 Ktor HttpRequestData 생성
             val ktorRequestBuilder1 = HttpRequestBuilder().apply {
@@ -359,7 +360,7 @@ class CrossClientCacheSharingTest {
                 repeat(2) { index ->
                     executorService.submit {
                         try {
-                            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+                            val ktorAdapter = KtorAdapter()
                             val ktorRequestBuilder = HttpRequestBuilder().apply {
                                 method = HttpMethod.Get
                                 url(testUrl)  // 동일한 URL 사용
@@ -420,7 +421,7 @@ class CrossClientCacheSharingTest {
 
             // Given: 어댑터와 테스트 URL 준비 (MockWebServer 없음)
             val okHttpAdapter = OkHttpAdapter()
-            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+            val ktorAdapter = KtorAdapter()
 
             val testUrls = listOf(
                 "$baseUrl/concurrent1",
@@ -545,7 +546,7 @@ class CrossClientCacheSharingTest {
             cacheRepo.mock(cacheKey, mockJsonResponse)
 
             // When: Ktor 어댑터로 동일한 캐시 접근
-            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+            val ktorAdapter = KtorAdapter()
             val ktorRequestBuilder = HttpRequestBuilder().apply {
                 method = HttpMethod.Get
                 url(testUrl)
@@ -617,7 +618,7 @@ class CrossClientCacheSharingTest {
             cacheRepo.mock(cacheKey, mockLargeResponse)
 
             // When: Ktor 어댑터로 동일한 캐시 접근
-            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+            val ktorAdapter = KtorAdapter()
             val ktorRequestBuilder = HttpRequestBuilder().apply {
                 method = HttpMethod.Get
                 url(testUrl)
@@ -665,7 +666,7 @@ class CrossClientCacheSharingTest {
             cacheRepo.mock(cacheKey, mockResponse)
 
             // When: Ktor 어댑터로 동일한 URL 접근
-            val ktorAdapter = net.spooncast.openmocker.lib.client.ktor.KtorAdapter()
+            val ktorAdapter = KtorAdapter()
             val ktorRequestBuilder = HttpRequestBuilder().apply {
                 method = HttpMethod.Get
                 url(urlWithParams)

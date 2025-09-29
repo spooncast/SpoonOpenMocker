@@ -5,7 +5,6 @@ import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.utils.io.*
 import net.spooncast.openmocker.lib.model.CachedResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
@@ -15,6 +14,7 @@ import io.mockk.mockk
 import io.mockk.every
 import io.mockk.coEvery
 import kotlinx.coroutines.test.runTest
+import net.spooncast.openmocker.lib.core.adapter.KtorAdapter
 
 @DisplayName("KtorAdapter 테스트")
 class KtorAdapterTest {

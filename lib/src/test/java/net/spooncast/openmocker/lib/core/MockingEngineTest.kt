@@ -2,9 +2,12 @@ package net.spooncast.openmocker.lib.core
 
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
+import net.spooncast.openmocker.lib.core.adapter.HttpClientAdapter
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.model.CachedValue
+import net.spooncast.openmocker.lib.model.HttpRequestData
+import net.spooncast.openmocker.lib.model.HttpResponseData
 import net.spooncast.openmocker.lib.repo.CacheRepo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -44,7 +47,8 @@ class MockingEngineTest {
         fun `should return null when no mock exists`() = runTest {
             // Given
             val request = "test-request"
-            val requestData = HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
+            val requestData =
+                HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
             val cachedKey = CachedKey("GET", "/api/test")
 
             every { mockAdapter.extractRequestData(request) } returns requestData
@@ -67,7 +71,8 @@ class MockingEngineTest {
         fun `should return null when no mock exists in sync version`() {
             // Given
             val request = "test-request"
-            val requestData = HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
+            val requestData =
+                HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
 
             every { mockAdapter.extractRequestData(request) } returns requestData
             every { mockCacheRepo.getMock("GET", "/api/test") } returns null
@@ -96,7 +101,8 @@ class MockingEngineTest {
         fun `should return mock response when mock exists`() = runTest {
             // Given
             val request = "test-request"
-            val requestData = HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
+            val requestData =
+                HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
             val cachedKey = CachedKey("GET", "/api/test")
             val originalResponse = CachedResponse(200, """{"original": true}""")
             val mockResponse = CachedResponse(201, """{"mocked": true}""", 0L)
@@ -125,7 +131,8 @@ class MockingEngineTest {
         fun `should return mock response when mock has duration`() = runTest {
             // Given
             val request = "test-request"
-            val requestData = HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
+            val requestData =
+                HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
             val cachedKey = CachedKey("GET", "/api/test")
             val originalResponse = CachedResponse(200, "original")
             val mockResponse = CachedResponse(200, "delayed response", 100L) // 100ms delay
@@ -153,7 +160,8 @@ class MockingEngineTest {
         fun `should return mock response without delay in sync version`() {
             // Given
             val request = "test-request"
-            val requestData = HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
+            val requestData =
+                HttpRequestData("GET", "/api/test", "https://api.example.com/api/test")
             val mockResponse = CachedResponse(200, "sync response", 1000L) // Long delay
             val expectedMockResult = "sync-mock-response"
 
@@ -190,7 +198,8 @@ class MockingEngineTest {
             // Given
             val request = "test-request"
             val response = "test-response"
-            val requestData = HttpRequestData("POST", "/api/create", "https://api.example.com/api/create")
+            val requestData =
+                HttpRequestData("POST", "/api/create", "https://api.example.com/api/create")
             val responseData = HttpResponseData(201, """{"id": 123}""")
 
             every { mockAdapter.extractRequestData(request) } returns requestData

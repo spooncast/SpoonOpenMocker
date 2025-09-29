@@ -3,6 +3,7 @@ package net.spooncast.openmocker.lib.client.ktor
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import net.spooncast.openmocker.lib.core.MockingEngine
+import net.spooncast.openmocker.lib.core.adapter.KtorAdapter
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
 
 /**

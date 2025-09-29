@@ -1,6 +1,4 @@
-package net.spooncast.openmocker.lib.core
-
-import net.spooncast.openmocker.lib.model.CachedKey
+package net.spooncast.openmocker.lib.model
 
 /**
  * Client-agnostic HTTP request data model

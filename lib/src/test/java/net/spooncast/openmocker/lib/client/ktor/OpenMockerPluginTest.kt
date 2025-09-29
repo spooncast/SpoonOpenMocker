@@ -5,12 +5,10 @@ import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.utils.io.*
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import net.spooncast.openmocker.lib.core.MockingEngine
-import net.spooncast.openmocker.lib.core.HttpRequestData
-import net.spooncast.openmocker.lib.core.HttpResponseData
+import net.spooncast.openmocker.lib.model.HttpRequestData
 import net.spooncast.openmocker.lib.model.CachedResponse
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
 import org.junit.jupiter.api.Test

@@ -6,7 +6,7 @@ import net.spooncast.openmocker.demo.repo.WeatherRepo
 import javax.inject.Inject
 
 class GetWeatherImpl @Inject constructor(
-    @KtorWeatherRepo
+    @param:KtorWeatherRepo
     private val weatherRepo: WeatherRepo
 ): GetWeather {
 

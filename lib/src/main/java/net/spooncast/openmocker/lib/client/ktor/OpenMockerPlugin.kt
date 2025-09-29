@@ -1,10 +1,8 @@
 package net.spooncast.openmocker.lib.client.ktor
 
-import io.ktor.client.call.HttpClientCall
 import io.ktor.client.plugins.api.Send
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.HttpRequestData
-import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 import io.ktor.utils.io.InternalAPI
 import kotlinx.coroutines.delay
@@ -77,11 +75,8 @@ val OpenMockerPlugin = createClientPlugin("OpenMocker", ::OpenMockerPluginConfig
                 delay(mockData.duration)
             }
 
-            // Create mock response using MockingEngine abstraction
-            val mockResponse = config.mockingEngine.createMockResponse(requestData, mockData)
-
             // Create HttpClientCall wrapper for the mock response
-            return@on createMockCall(requestData, mockResponse)
+            return@on config.mockingEngine.createMockResponse(requestData, mockData).call
         }
 
         // Proceed with normal network call
@@ -106,25 +101,3 @@ val OpenMockerPlugin = createClientPlugin("OpenMocker", ::OpenMockerPluginConfig
         config.mockingEngine.cacheResponse(request, response)
     }
 }
-
-/**
- * Creates a mock HttpClientCall from a mock response
- *
- * This function wraps the mock HttpResponse into a proper HttpClientCall
- * that can be returned from the on(Send) hook, effectively bypassing
- * the network call while maintaining the same API contract.
- *
- * Since HttpClientCall has complex internal state and we can't easily construct
- * it directly, we return the existing call from the mock response, which was
- * already properly constructed by the KtorAdapter.createMockResponse() method.
- */
-private suspend fun createMockCall(
-    requestData: HttpRequestData,
-    mockResponse: HttpResponse
-): HttpClientCall {
-    // The mockResponse already contains a properly constructed HttpClientCall
-    // from the KtorAdapter.createMockResponse() method, so we can return it directly
-    return mockResponse.call
-}
-
-

@@ -1,6 +1,6 @@
 package net.spooncast.openmocker.lib.core
 
-import net.spooncast.openmocker.lib.model.CachedResponse
+import net.spooncast.openmocker.lib.model.HttpResponseData
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested

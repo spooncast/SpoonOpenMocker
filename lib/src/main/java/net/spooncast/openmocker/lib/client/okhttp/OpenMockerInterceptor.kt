@@ -3,6 +3,7 @@ package net.spooncast.openmocker.lib.client.okhttp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.spooncast.openmocker.lib.core.MockingEngine
+import net.spooncast.openmocker.lib.core.adapter.OkHttpAdapter
 import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
 import okhttp3.Interceptor
 import okhttp3.Request

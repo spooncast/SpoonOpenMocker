@@ -1,20 +1,26 @@
-package net.spooncast.openmocker.lib.client.ktor
+package net.spooncast.openmocker.lib.core.adapter
 
-import io.ktor.client.*
-import io.ktor.client.engine.mock.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.request.headers
+import io.ktor.client.request.request
+import io.ktor.client.request.url
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.*
-import io.ktor.utils.io.*
+import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import net.spooncast.openmocker.lib.core.HttpClientAdapter
-import net.spooncast.openmocker.lib.core.HttpRequestData
-import net.spooncast.openmocker.lib.core.HttpResponseData
 import net.spooncast.openmocker.lib.model.CachedResponse
+import net.spooncast.openmocker.lib.model.HttpRequestData
+import net.spooncast.openmocker.lib.model.HttpResponseData
 
 /**
  * Ktor-specific adapter implementation
@@ -23,8 +29,6 @@ import net.spooncast.openmocker.lib.model.CachedResponse
  * and the generic HttpRequestData/HttpResponseData models used by the mocking engine.
  */
 internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpRequestData, HttpResponse> {
-
-    override val clientType: String = "Ktor"
 
     /**
      * Extracts client-agnostic request data from Ktor HttpRequestData
@@ -39,6 +43,31 @@ internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpReques
                     put(key, values)
                 }
             }
+        )
+    }
+
+    /**
+     * Extracts client-agnostic response data from Ktor HttpResponse
+     */
+    override fun extractResponseData(clientResponse: HttpResponse): HttpResponseData {
+        val body = try {
+            runBlocking {
+                clientResponse.bodyAsText()
+            }
+        } catch (e: Exception) {
+            // Fallback to empty body if reading fails
+            ""
+        }
+
+        return HttpResponseData(
+            code = clientResponse.status.value,
+            body = body,
+            headers = buildMap {
+                clientResponse.headers.forEach { key, values ->
+                    put(key, values)
+                }
+            },
+            isSuccessful = clientResponse.status.isSuccess()
         )
     }
 
@@ -86,55 +115,5 @@ internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpReques
             client.close()
             response
         }
-    }
-
-    /**
-     * Extracts client-agnostic response data from Ktor HttpResponse
-     */
-    override fun extractResponseData(clientResponse: HttpResponse): HttpResponseData {
-        val body = try {
-            runBlocking {
-                clientResponse.bodyAsText()
-            }
-        } catch (e: Exception) {
-            // Fallback to empty body if reading fails
-            ""
-        }
-
-        return HttpResponseData(
-            code = clientResponse.status.value,
-            body = body,
-            headers = buildMap {
-                clientResponse.headers.forEach { key, values ->
-                    put(key, values)
-                }
-            },
-            isSuccessful = clientResponse.status.isSuccess()
-        )
-    }
-
-    /**
-     * Validates if the given objects are Ktor HttpRequestData and HttpResponse types
-     */
-    override fun isSupported(request: Any?, response: Any?): Boolean {
-        return request is io.ktor.client.request.HttpRequestData && response is HttpResponse
-    }
-
-    /**
-     * Checks if the given request is a Ktor HttpRequestData
-     */
-    override fun canHandleRequest(request: Any): Boolean {
-        return request is io.ktor.client.request.HttpRequestData
-    }
-
-    /**
-     * Checks if the given response is a Ktor HttpResponse
-     */
-    override fun canHandleResponse(response: Any): Boolean {
-        return response is HttpResponse
-    }
-
-    companion object {
-        const val MOCKER_MESSAGE = "OpenMocker enabled"
     }
 }
