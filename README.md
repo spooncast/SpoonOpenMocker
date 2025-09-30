@@ -6,6 +6,8 @@
 
 OpenMocker is an Android library that provides powerful HTTP request mocking capabilities for both OkHttp and Ktor clients. It allows developers to easily intercept network requests, cache responses, and mock API responses during development and testing.
 
+Developed and maintained by **SpoonLabs Android Team**.
+
 ## Features
 
 - 🔌 **Multi-Client Support**: Works with both OkHttp (via Interceptor) and Ktor (via Plugin)
@@ -200,7 +202,7 @@ OpenMocker is compiled with the following dependency versions. Using lower versi
 ## License
 
 ```
-Copyright 2024 Spooncast
+Copyright 2024 SpoonLabs Android Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -214,3 +216,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+## Team
+
+OpenMocker is developed and maintained by the **SpoonLabs Android Team**.
+
+We are committed to providing high-quality Android development tools that improve developer productivity and app quality.
