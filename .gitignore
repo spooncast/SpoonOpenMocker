@@ -31,3 +31,8 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# AI
+CLAUDE.md
+TASK.md
+.claude/

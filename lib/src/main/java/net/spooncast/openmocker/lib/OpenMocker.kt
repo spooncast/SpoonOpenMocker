@@ -12,7 +12,7 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import net.spooncast.openmocker.lib.interceptor.OpenMockerInterceptor
+import net.spooncast.openmocker.lib.client.okhttp.OpenMockerInterceptor
 import net.spooncast.openmocker.lib.ui.OpenMockerActivity
 
 object OpenMocker {

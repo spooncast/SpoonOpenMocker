@@ -41,6 +41,14 @@ android {
     composeCompiler {
         enableStrongSkippingMode = true
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.useJUnitPlatform()
+            }
+        }
+    }
 }
 
 dependencies {
@@ -53,7 +61,12 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
+    testImplementation(libs.junit5.api)
+    testImplementation(libs.junit5.params)
+    testRuntimeOnly(libs.junit5.engine)
+    testRuntimeOnly(libs.junit5.vintage.engine) // For JUnit 4 compatibility
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -73,6 +86,16 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
+
+    // Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.http)
+    implementation(libs.ktor.utils)
+    implementation(libs.ktor.client.mock)
+    implementation(libs.ktor.client.json)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.serialization)
+    testImplementation(libs.ktor.client.mock)
 }
 
 publishing {
@@ -80,7 +103,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "net.spooncast"
             artifactId = "openmocker"
-            version = "0.0.13"
+            version = "0.0.1"
 
             afterEvaluate {
                 from(components["release"])
