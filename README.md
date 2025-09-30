@@ -165,25 +165,6 @@ Use the UI to configure response delays per endpoint:
 3. Edit the "Delay (ms)" field
 4. Save changes
 
-## Development
-
-```bash
-# Build the project
-./gradlew build
-
-# Run tests
-./gradlew test
-
-# Run lint checks
-./gradlew lint
-
-# Build library only
-./gradlew :lib:build
-
-# Publish to local Maven
-./gradlew :lib:publishToMavenLocal
-```
-
 ## Module Structure
 
 - **`lib/`**: The OpenMocker library (publishable artifact)
