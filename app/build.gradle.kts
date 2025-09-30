@@ -79,7 +79,6 @@ dependencies {
     kapt(libs.androidx.hilt.compiler)
 
     // OkHttp
-    implementation(platform(libs.okhttp3.bom))
     implementation(libs.okhttp3)
     implementation(libs.okhttp3.logging.interceptor)
 
