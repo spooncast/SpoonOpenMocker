@@ -28,8 +28,4 @@ internal class MockingEngine<TRequest, TResponse>(
     fun createMockResponse(clientRequest: TRequest, cachedResponse: CachedResponse): TResponse {
         return clientAdapter.createMockResponse(clientRequest, cachedResponse)
     }
-
-    companion object {
-        const val MOCKER_MESSAGE = "OpenMocker enabled"
-    }
 }
