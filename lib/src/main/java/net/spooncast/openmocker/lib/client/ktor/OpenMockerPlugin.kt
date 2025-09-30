@@ -88,6 +88,7 @@ val OpenMockerPlugin = createClientPlugin("OpenMocker", ::OpenMockerPluginConfig
 
     onResponse { response ->
         val config = this@createClientPlugin.pluginConfig
+        if (!config.enabled) return@onResponse
 
         val request = HttpRequestData(
             url = response.request.url,
