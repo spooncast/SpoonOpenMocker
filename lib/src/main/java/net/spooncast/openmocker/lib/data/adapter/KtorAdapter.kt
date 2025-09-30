@@ -63,7 +63,7 @@ internal class KtorAdapter: HttpClientAdapter<HttpRequestData, HttpResponse> {
         val mockEngine = MockEngine { requestData ->
             respond(
                 content = ByteReadChannel(mockResponse.body),
-                status = HttpStatusCode.Companion.fromValue(mockResponse.code),
+                status = HttpStatusCode.fromValue(mockResponse.code),
                 headers = headersOf(
                     HttpHeaders.ContentType to listOf(ContentType.Application.Json.toString())
                 )
@@ -80,6 +80,9 @@ internal class KtorAdapter: HttpClientAdapter<HttpRequestData, HttpResponse> {
                     coerceInputValues = true
                 })
             }
+
+            // ResponseValidator를 이용하여, HttpStatusCode에 따른 Exception 유발
+            expectSuccess = true
         }
 
         return runBlocking {
