@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse
-import net.spooncast.openmocker.lib.repo.CacheRepo
+import net.spooncast.openmocker.lib.data.repo.CacheRepo
 
 internal class ApiDetailViewModel(
     private val savedStateHandle: SavedStateHandle,

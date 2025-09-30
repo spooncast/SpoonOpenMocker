@@ -52,39 +52,35 @@ android {
 }
 
 dependencies {
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
+    // AndroidX
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    testImplementation(libs.junit5.api)
-    testImplementation(libs.junit5.params)
-    testRuntimeOnly(libs.junit5.engine)
-    testRuntimeOnly(libs.junit5.vintage.engine) // For JUnit 4 compatibility
-    testImplementation("io.mockk:mockk:1.13.8")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Compose
+    implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+
+    // Activity Compose
+    implementation(libs.androidx.activity.compose)
+
+    // Test
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(libs.junit5.api)
+    testImplementation(libs.junit5.params)
+    testImplementation(libs.mockk)
+    testRuntimeOnly(libs.junit5.engine)
+    testRuntimeOnly(libs.junit5.vintage.engine)
 
     // Okhttp
     implementation(libs.okhttp3)
     implementation(libs.okhttp3.logging.interceptor)
-
-    // Navigation Compose
-    implementation(libs.navigation.compose)
-
-    // Serialization
-    implementation(libs.jetbrains.kotlinx.serialization.json)
-
-    // Gson
-    implementation(libs.gson)
 
     // Ktor
     implementation(libs.ktor.client.core)
@@ -95,6 +91,15 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.serialization)
     testImplementation(libs.ktor.client.mock)
+
+    // Serialization
+    implementation(libs.jetbrains.kotlinx.serialization.json)
+
+    // Gson
+    implementation(libs.gson)
+
+    // Navigation Compose
+    implementation(libs.navigation.compose)
 }
 
 publishing {

@@ -9,7 +9,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedValue
-import net.spooncast.openmocker.lib.repo.CacheRepo
+import net.spooncast.openmocker.lib.data.repo.CacheRepo
 import net.spooncast.openmocker.lib.ui.list.dialog.ApiListDialogState
 
 internal class ApiListViewModel(

@@ -1,9 +1,10 @@
-package net.spooncast.openmocker.lib.core.adapter
+package net.spooncast.openmocker.lib.data.adapter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.headers
 import io.ktor.client.request.request
 import io.ktor.client.request.url
@@ -19,22 +20,12 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.spooncast.openmocker.lib.model.CachedResponse
-import net.spooncast.openmocker.lib.model.HttpRequestData
-import net.spooncast.openmocker.lib.model.HttpResponseData
+import net.spooncast.openmocker.lib.model.HttpResp
 
-/**
- * Ktor-specific adapter implementation
- *
- * This adapter handles the conversion between Ktor's HttpRequestData/HttpResponse objects
- * and the generic HttpRequestData/HttpResponseData models used by the mocking engine.
- */
-internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpRequestData, HttpResponse> {
+internal class KtorAdapter: HttpClientAdapter<HttpRequestData, HttpResponse> {
 
-    /**
-     * Extracts client-agnostic request data from Ktor HttpRequestData
-     */
-    override fun extractRequestData(clientRequest: io.ktor.client.request.HttpRequestData): HttpRequestData {
-        return HttpRequestData(
+    override fun extractRequestData(clientRequest: HttpRequestData): net.spooncast.openmocker.lib.model.HttpReq {
+        return net.spooncast.openmocker.lib.model.HttpReq(
             method = clientRequest.method.value,
             path = clientRequest.url.encodedPath,
             url = clientRequest.url.toString(),
@@ -46,10 +37,7 @@ internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpReques
         )
     }
 
-    /**
-     * Extracts client-agnostic response data from Ktor HttpResponse
-     */
-    override fun extractResponseData(clientResponse: HttpResponse): HttpResponseData {
+    override fun extractResponseData(clientResponse: HttpResponse): HttpResp {
         val body = try {
             runBlocking {
                 clientResponse.bodyAsText()
@@ -59,7 +47,7 @@ internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpReques
             ""
         }
 
-        return HttpResponseData(
+        return HttpResp(
             code = clientResponse.status.value,
             body = body,
             headers = buildMap {
@@ -71,17 +59,11 @@ internal class KtorAdapter : HttpClientAdapter<io.ktor.client.request.HttpReques
         )
     }
 
-    /**
-     * Creates a Ktor HttpResponse from cached response data
-     *
-     * This method constructs a mock Ktor HttpResponse that matches the original request
-     * but contains the mocked status code, body, and other properties from the cache.
-     */
-    override fun createMockResponse(originalRequest: io.ktor.client.request.HttpRequestData, mockResponse: CachedResponse): HttpResponse {
+    override fun createMockResponse(originalRequest: HttpRequestData, mockResponse: CachedResponse): HttpResponse {
         val mockEngine = MockEngine { requestData ->
             respond(
                 content = ByteReadChannel(mockResponse.body),
-                status = HttpStatusCode.fromValue(mockResponse.code),
+                status = HttpStatusCode.Companion.fromValue(mockResponse.code),
                 headers = headersOf(
                     HttpHeaders.ContentType to listOf(ContentType.Application.Json.toString())
                 )
