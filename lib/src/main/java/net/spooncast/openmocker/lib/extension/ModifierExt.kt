@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun Modifier.singleClickable(
+internal fun Modifier.singleClickable(
     enabled: Boolean = true,
     durationMillis: Long = 1_000L,
     onClick: () -> Unit,

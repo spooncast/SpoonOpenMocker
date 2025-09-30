@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
+import net.spooncast.openmocker.lib.data.repo.MemCacheRepoImpl
 import net.spooncast.openmocker.lib.ui.detail.ApiDetailPane
 import net.spooncast.openmocker.lib.ui.detail.ApiDetailViewModel
 import net.spooncast.openmocker.lib.ui.list.ApiListPane

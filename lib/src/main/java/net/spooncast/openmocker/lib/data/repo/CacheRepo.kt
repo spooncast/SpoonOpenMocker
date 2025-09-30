@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.repo
+package net.spooncast.openmocker.lib.data.repo
 
 import net.spooncast.openmocker.lib.model.CachedKey
 import net.spooncast.openmocker.lib.model.CachedResponse

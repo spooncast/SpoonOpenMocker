@@ -1,4 +1,4 @@
-package net.spooncast.openmocker.lib.repo
+package net.spooncast.openmocker.lib.data.repo
 
 import androidx.compose.runtime.mutableStateMapOf
 import com.google.gson.GsonBuilder

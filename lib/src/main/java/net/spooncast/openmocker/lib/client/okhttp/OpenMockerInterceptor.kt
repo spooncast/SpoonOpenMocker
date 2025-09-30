@@ -2,9 +2,9 @@ package net.spooncast.openmocker.lib.client.okhttp
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import net.spooncast.openmocker.lib.core.MockingEngine
-import net.spooncast.openmocker.lib.core.adapter.OkHttpAdapter
-import net.spooncast.openmocker.lib.repo.MemCacheRepoImpl
+import net.spooncast.openmocker.lib.data.MockingEngine
+import net.spooncast.openmocker.lib.data.adapter.OkHttpAdapter
+import net.spooncast.openmocker.lib.data.repo.MemCacheRepoImpl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
@@ -16,16 +16,13 @@ class OpenMockerInterceptor private constructor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
 
-        // Check for mock data using MockingEngine abstraction
         val mockData = mockingEngine.getMockData(request)
 
         if (mockData != null) {
-            // Apply delay if configured (OkHttp-specific: synchronous blocking)
             if (mockData.duration > 0) {
                 runBlocking { delay(mockData.duration) }
             }
 
-            // Create mock response using MockingEngine abstraction
             return mockingEngine.createMockResponse(request, mockData)
         }
 
@@ -42,9 +39,5 @@ class OpenMockerInterceptor private constructor(
             val mockingEngine = MockingEngine(cacheRepo, adapter)
             return OpenMockerInterceptor(mockingEngine)
         }
-    }
-
-    companion object {
-        const val MOCKER_MESSAGE = "OpenMocker enabled"
     }
 }

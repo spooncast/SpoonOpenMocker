@@ -1,26 +1,16 @@
-package net.spooncast.openmocker.lib.core.adapter
+package net.spooncast.openmocker.lib.data.adapter
 
 import net.spooncast.openmocker.lib.model.CachedResponse
-import net.spooncast.openmocker.lib.model.HttpRequestData
-import net.spooncast.openmocker.lib.model.HttpResponseData
+import net.spooncast.openmocker.lib.model.HttpReq
+import net.spooncast.openmocker.lib.model.HttpResp
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 
-/**
- * OkHttp-specific adapter implementation
- *
- * This adapter handles the conversion between OkHttp's Request/Response objects
- * and the generic HttpRequestData/HttpResponseData models used by the mocking engine.
- */
 internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
-
-    /**
-     * Extracts client-agnostic request data from OkHttp Request
-     */
-    override fun extractRequestData(clientRequest: Request): HttpRequestData {
-        return HttpRequestData(
+    override fun extractRequestData(clientRequest: Request): HttpReq {
+        return HttpReq(
             method = clientRequest.method,
             path = clientRequest.url.encodedPath,
             url = clientRequest.url.toString(),
@@ -28,19 +18,14 @@ internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
         )
     }
 
-    /**
-     * Extracts client-agnostic response data from OkHttp Response
-     */
-    override fun extractResponseData(clientResponse: Response): HttpResponseData {
-        // Use peekBody to avoid consuming the response body
+    override fun extractResponseData(clientResponse: Response): HttpResp {
         val body = try {
             clientResponse.peekBody(Long.MAX_VALUE).string()
         } catch (e: Exception) {
-            // Fallback to empty body if reading fails
             ""
         }
 
-        return HttpResponseData(
+        return HttpResp(
             code = clientResponse.code,
             body = body,
             headers = clientResponse.headers.toMultimap(),
@@ -48,12 +33,6 @@ internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
         )
     }
 
-    /**
-     * Creates an OkHttp Response from cached response data
-     *
-     * This method constructs a mock OkHttp Response that matches the original request
-     * but contains the mocked status code, body, and other properties from the cache.
-     */
     override fun createMockResponse(originalRequest: Request, mockResponse: CachedResponse): Response {
         return Response.Builder()
             .protocol(Protocol.HTTP_2)
@@ -68,4 +47,3 @@ internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
         const val MOCKER_MESSAGE = "OpenMocker enabled"
     }
 }
-
