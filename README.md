@@ -1,10 +1,10 @@
-# OpenMocker
+# SpoonOpenMocker
 
-[![Maven Central](https://img.shields.io/badge/Maven%20Central-0.0.18-blue.svg)](https://search.maven.org/artifact/net.spooncast/openmocker)
+[![JitPack](https://jitpack.io/v/spooncast/SpoonOpenMocker.svg)](https://jitpack.io/#spooncast/SpoonOpenMocker)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Min SDK](https://img.shields.io/badge/Min%20SDK-28-orange.svg)](https://developer.android.com/about/versions/pie)
 
-OpenMocker is an Android library that provides powerful HTTP request mocking capabilities for both OkHttp and Ktor clients. It allows developers to easily intercept network requests, cache responses, and mock API responses during development and testing.
+SpoonOpenMocker is an Android library that provides powerful HTTP request mocking capabilities for both OkHttp and Ktor clients. It allows developers to easily intercept network requests, cache responses, and mock API responses during development and testing.
 
 Developed and maintained by **SpoonLabs Android Team**.
 
@@ -20,11 +20,39 @@ Developed and maintained by **SpoonLabs Android Team**.
 
 ## Installation
 
+### Step 1: Add JitPack repository
+
+Add JitPack to your project's `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }  // Add this line
+    }
+}
+```
+
+Or in your root `build.gradle.kts` (legacy):
+
+```kotlin
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }  // Add this line
+    }
+}
+```
+
+### Step 2: Add the dependency
+
 Add the dependency to your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("net.spooncast:openmocker:0.0.18")
+    implementation("com.github.spooncast:SpoonOpenMocker:0.0.18")
 }
 ```
 
@@ -32,11 +60,14 @@ dependencies {
 
 ### OkHttp Integration
 
+Simply add the OpenMocker interceptor to your OkHttpClient:
+
 ```kotlin
 val client = OkHttpClient.Builder()
     .addInterceptor(OpenMocker.getInterceptor())
     .build()
 
+// Use with Retrofit
 val retrofit = Retrofit.Builder()
     .baseUrl("https://api.example.com/")
     .client(client)
@@ -45,10 +76,12 @@ val retrofit = Retrofit.Builder()
 
 ### Ktor Integration
 
+Install the OpenMocker plugin in your Ktor HttpClient:
+
 ```kotlin
 val client = HttpClient(Android) {
     install(OpenMockerPlugin) {
-        enabled = true
+        enabled = true  // Set to false to disable
     }
 }
 ```
@@ -73,32 +106,54 @@ OpenMocker.showNotification(activity)
 
 ## Usage Example
 
-See the demo app for a complete example using the OpenWeatherMap API:
+The library itself **does not require dependency injection**. It uses internal singletons for state management.
+
+### OkHttp + Retrofit Example
 
 ```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-object ServiceModule {
+val client = OkHttpClient.Builder()
+    .addInterceptor(OpenMocker.getInterceptor())
+    .build()
 
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(OpenMocker.getInterceptor())
-            .build()
+val retrofit = Retrofit.Builder()
+    .baseUrl("https://api.openweathermap.org/data/2.5/")
+    .addConverterFactory(GsonConverterFactory.create())
+    .client(client)
+    .build()
+
+val weatherService = retrofit.create(WeatherApiService::class.java)
+```
+
+### Ktor Example
+
+```kotlin
+val client = HttpClient(Android) {
+    install(Logging) {
+        logger = Logger.ANDROID
+        level = LogLevel.ALL
     }
 
-    @Provides
-    @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl("https://api.openweathermap.org/data/2.5/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .build()
+    install(ContentNegotiation) {
+        json(Json {
+            ignoreUnknownKeys = true
+        })
+    }
+
+    install(OpenMockerPlugin) {
+        enabled = true
     }
 }
+
+// Use the client for API calls
+suspend fun getWeather(): WeatherResponse {
+    return client.get("https://api.openweathermap.org/data/2.5/weather") {
+        parameter("lat", "44.34")
+        parameter("lon", "10.99")
+    }.body()
+}
 ```
+
+> **Note**: The demo app uses Hilt for dependency injection, but this is **not required** to use SpoonOpenMocker. The library works with or without DI frameworks.
 
 ## Architecture
 
@@ -132,9 +187,11 @@ OpenMocker uses a clean, modular architecture:
 ### Key Components
 
 - **MockingEngine**: Generic orchestration layer coordinating HTTP clients and cache
-- **HttpClientAdapter**: Abstraction for normalizing different HTTP client types
-- **CacheRepo**: In-memory singleton storing mocked responses by method + path
-- **UI Layer**: Jetpack Compose MVVM architecture with two-pane layout
+- **HttpClientAdapter**: Abstraction for normalizing different HTTP client types (OkHttpAdapter, KtorAdapter)
+- **CacheRepo**: In-memory singleton storing mocked responses indexed by HTTP method + URL path
+- **OpenMockerInterceptor**: OkHttp interceptor implementation for request interception
+- **OpenMockerPlugin**: Ktor plugin implementation using client plugin API
+- **UI Layer**: Jetpack Compose with Material 3, MVVM architecture, two-pane layout
 
 ## Tech Stack
 
@@ -147,25 +204,36 @@ OpenMocker uses a clean, modular architecture:
 
 ## Configuration Options
 
-### Disable OpenMocker
+### Disable SpoonOpenMocker
 
-You can disable OpenMocker entirely by setting the config:
+For Ktor, you can disable the plugin:
 
 ```kotlin
-// For Ktor
 install(OpenMockerPlugin) {
     enabled = false  // Disable in production builds
 }
 ```
 
+For OkHttp, simply don't add the interceptor in production builds:
+
+```kotlin
+val client = OkHttpClient.Builder()
+    .apply {
+        if (BuildConfig.DEBUG) {
+            addInterceptor(OpenMocker.getInterceptor())
+        }
+    }
+    .build()
+```
+
 ### Custom Response Delays
 
-Use the UI to configure response delays per endpoint:
+Use the built-in UI to configure response delays per endpoint:
 
-1. Open OpenMocker UI
-2. Select an API endpoint
-3. Edit the "Delay (ms)" field
-4. Save changes
+1. Call `OpenMocker.show(context)` or tap the notification
+2. Select an API endpoint from the list
+3. Edit the "Delay (ms)" field in the detail pane
+4. Changes are applied immediately
 
 ## Module Structure
 
@@ -219,6 +287,6 @@ limitations under the License.
 
 ## Team
 
-OpenMocker is developed and maintained by the **SpoonLabs Android Team**.
+SpoonOpenMocker is developed and maintained by the **SpoonLabs Android Team**.
 
 We are committed to providing high-quality Android development tools that improve developer productivity and app quality.
