@@ -81,8 +81,7 @@ internal class KtorAdapter: HttpClientAdapter<HttpRequestData, HttpResponse> {
                 })
             }
 
-            // ResponseValidator를 이용하여, HttpStatusCode에 따른 Exception 유발
-            expectSuccess = true
+            expectSuccess = false
         }
 
         return runBlocking {
