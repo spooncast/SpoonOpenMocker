@@ -22,6 +22,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Weather API Key from environment variable or default for demo
+        buildConfigField("String", "WEATHER_API_KEY", "\"${System.getenv("WEATHER_API_KEY") ?: ""}\"")
+
     }
 
     buildTypes {
@@ -42,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
