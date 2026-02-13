@@ -37,11 +37,9 @@ internal class KtorAdapter: HttpClientAdapter<HttpRequestData, HttpResponse> {
         )
     }
 
-    override fun extractResponseData(clientResponse: HttpResponse): HttpResp {
+    override suspend fun extractResponseData(clientResponse: HttpResponse): HttpResp {
         val body = try {
-            runBlocking {
-                clientResponse.bodyAsText()
-            }
+            clientResponse.bodyAsText()
         } catch (e: Exception) {
             // Fallback to empty body if reading fails
             ""

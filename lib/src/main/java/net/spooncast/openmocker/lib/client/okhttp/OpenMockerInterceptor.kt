@@ -27,7 +27,7 @@ class OpenMockerInterceptor private constructor(
         }
 
         val response = chain.proceed(request)
-        mockingEngine.cacheResponse(request, response)
+        runBlocking { mockingEngine.cacheResponse(request, response) }
 
         return response
     }

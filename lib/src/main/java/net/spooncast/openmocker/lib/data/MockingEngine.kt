@@ -8,7 +8,7 @@ internal class MockingEngine<TRequest, TResponse>(
     private val cacheRepo: CacheRepo,
     private val clientAdapter: HttpClientAdapter<TRequest, TResponse>
 ) {
-    fun cacheResponse(clientRequest: TRequest, clientResponse: TResponse) {
+    suspend fun cacheResponse(clientRequest: TRequest, clientResponse: TResponse) {
         val requestData = clientAdapter.extractRequestData(clientRequest)
         val responseData = clientAdapter.extractResponseData(clientResponse)
 

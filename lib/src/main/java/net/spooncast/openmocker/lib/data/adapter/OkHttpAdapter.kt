@@ -18,7 +18,7 @@ internal class OkHttpAdapter : HttpClientAdapter<Request, Response> {
         )
     }
 
-    override fun extractResponseData(clientResponse: Response): HttpResp {
+    override suspend fun extractResponseData(clientResponse: Response): HttpResp {
         val body = try {
             clientResponse.peekBody(Long.MAX_VALUE).string()
         } catch (e: Exception) {
