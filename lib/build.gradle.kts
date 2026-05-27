@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.parcelize)
     id("maven-publish")
+    jacoco
 }
 
 android {
@@ -20,6 +21,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -100,6 +104,40 @@ dependencies {
 
     // Navigation Compose
     implementation(libs.navigation.compose)
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+    }
+
+    // Compose UI / 자동 생성 코드는 단위 테스트 대상이 아니므로 커버리지 집계에서 제외한다.
+    val excludes = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*_Factory.*",
+        "**/ui/**",
+        "**/*\$Companion*.*",
+        "**/ComposableSingletons*.*",
+        "**/*\$\$serializer.*"
+    )
+
+    val kotlinClasses = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+        setExcludes(excludes)
+    }
+
+    sourceDirectories.setFrom(files("${projectDir}/src/main/java"))
+    classDirectories.setFrom(files(kotlinClasses))
+    executionData.setFrom(
+        fileTree(layout.buildDirectory.get()) {
+            setIncludes(listOf("**/testDebugUnitTest.exec", "**/*.ec"))
+        }
+    )
 }
 
 publishing {
