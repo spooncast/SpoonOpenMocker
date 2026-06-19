@@ -32,4 +32,8 @@ google-services.json
 # Android Profiling
 *.hprof
 
+# Python
+__pycache__/
+*.pyc
+
 # AI
