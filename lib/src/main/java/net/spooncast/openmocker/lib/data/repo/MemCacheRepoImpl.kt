@@ -48,6 +48,23 @@ internal class MemCacheRepoImpl private constructor(): CacheRepo {
         return true
     }
 
+    override fun upsertMock(
+        method: String,
+        urlPath: String,
+        code: Int,
+        body: String,
+        duration: Long
+    ): Boolean {
+        val key = CachedKey(method, urlPath)
+        val mockResponse = CachedResponse(code, body, duration)
+        val existing = _cachedMap[key]
+        // 기존 항목이면 관측된 response 는 보존하고 mock 만 갱신한다.
+        // 항목이 없으면 baseline response 를 mock 과 동일하게 두고 새로 생성한다(create-or-update).
+        _cachedMap[key] = existing?.copy(mock = mockResponse)
+            ?: CachedValue(response = mockResponse, mock = mockResponse)
+        return true
+    }
+
     override fun unMock(key: CachedKey): Boolean {
         val value = _cachedMap[key] ?: return false
         _cachedMap[key] = value.copy(mock = null)

@@ -100,6 +100,43 @@ class MemCacheRepoImplTest {
     }
 
     @Test
+    fun `upsertMock 은 캐시에 없던 키면 새로 생성하고 mock 을 설정한다`() {
+        val result = repo.upsertMock("GET", "/users", 500, "down", 1000L)
+
+        assertTrue(result)
+        assertEquals(1, repo.cachedMap.size)
+        val mock = repo.getMock("GET", "/users")
+        assertEquals(CachedResponse(500, "down", 1000L), mock)
+    }
+
+    @Test
+    fun `upsertMock 은 신규 생성 시 baseline response 도 mock 과 동일하게 둔다`() {
+        repo.upsertMock("GET", "/users", 503, "x", 0L)
+
+        val value = repo.cachedMap[CachedKey("GET", "/users")]
+        assertEquals(CachedResponse(503, "x", 0L), value?.response)
+    }
+
+    @Test
+    fun `upsertMock 은 기존 항목이면 response 는 보존하고 mock 만 갱신한다`() {
+        repo.cache("GET", "/users", 200, "{}")
+
+        repo.upsertMock("GET", "/users", 503, "down", 1000L)
+
+        val value = repo.cachedMap[CachedKey("GET", "/users")]
+        assertEquals(200, value?.response?.code)
+        assertEquals(CachedResponse(503, "down", 1000L), value?.mock)
+        assertEquals(1, repo.cachedMap.size)
+    }
+
+    @Test
+    fun `upsertMock 은 duration 을 생략하면 0 으로 설정한다`() {
+        repo.upsertMock("GET", "/users", 500, "x")
+
+        assertEquals(0L, repo.getMock("GET", "/users")?.duration)
+    }
+
+    @Test
     fun `unMock 은 설정된 mock 을 제거하고 true 를 반환한다`() {
         repo.cache("GET", "/users", 200, "{}")
         val key = CachedKey("GET", "/users")

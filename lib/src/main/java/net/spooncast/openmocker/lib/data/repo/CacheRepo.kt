@@ -17,5 +17,12 @@ internal interface CacheRepo {
     fun clearCache()
     fun getMock(method: String, urlPath: String): CachedResponse?
     fun mock(key: CachedKey, response: CachedResponse): Boolean
+    fun upsertMock(
+        method: String,
+        urlPath: String,
+        code: Int,
+        body: String,
+        duration: Long = 0L
+    ): Boolean
     fun unMock(key: CachedKey): Boolean
 }
