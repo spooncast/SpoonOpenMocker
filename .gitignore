@@ -33,6 +33,3 @@ google-services.json
 *.hprof
 
 # AI
-CLAUDE.md
-TASK.md
-.claude/
