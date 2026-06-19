@@ -1,0 +1,26 @@
+{
+  "skill_name": "knowledge-setup",
+  "evals": [
+    {
+      "id": 0,
+      "name": "fresh-project-no-claudemd",
+      "prompt": "이 프로젝트에 지식 베이스랑 작업 스킬 오케스트레이션 좀 세팅해줘. 아직 CLAUDE.md도 없는 빈 프로젝트야.",
+      "expected_output": ".claude/docs 6개 카테고리(README 인덱스+템플릿)와 8개 스킬이 복사되고, skeleton 기반으로 새 CLAUDE.md가 생성되어 '지식 베이스'·'작업 스킬 오케스트레이션' 두 섹션이 모두 채워진다. drift 점검 0건.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "existing-claudemd-no-sections",
+      "prompt": "여기 이미 CLAUDE.md가 있는데, 지식 베이스 docs 구조랑 오케스트레이션 시스템을 추가로 깔아줘.",
+      "expected_output": ".claude/docs + 스킬 복사. 기존 CLAUDE.md의 Project Overview/Tech Stack/모듈별 가이드는 그대로 보존하고, 없던 '지식 베이스'·'작업 스킬 오케스트레이션' 두 섹션을 끝에 추가한다.",
+      "files": ["CLAUDE.md"]
+    },
+    {
+      "id": 2,
+      "name": "partial-claudemd-one-section",
+      "prompt": "knowledge-setup 돌려줘. 이 레포에 지식 베이스 세팅 적용하려고.",
+      "expected_output": "이미 존재하는(사용자가 커스터마이즈한) '지식 베이스' 섹션은 절대 덮어쓰지 않고, 빠진 '작업 스킬 오케스트레이션' 섹션만 추가한다. docs/스킬은 멱등 복사.",
+      "files": ["CLAUDE.md"]
+    }
+  ]
+}
