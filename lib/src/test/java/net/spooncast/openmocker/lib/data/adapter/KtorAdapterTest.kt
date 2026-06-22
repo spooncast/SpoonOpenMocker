@@ -111,4 +111,49 @@ class KtorAdapterTest {
         val body = runBlocking { mock.bodyAsText() }
         assertEquals("{\"mocked\":true}", body)
     }
+
+    @Test
+    fun `createMockResponse 는 4xx mock 을 throw 없이 반환한다`() {
+        val (requestData, _) = exchange("https://api.example.com/x")
+
+        val mock = adapter.createMockResponse(requestData, CachedResponse(code = 404, body = "{\"error\":\"not found\"}"))
+
+        assertEquals(404, mock.status.value)
+        val body = runBlocking { mock.bodyAsText() }
+        assertEquals("{\"error\":\"not found\"}", body)
+    }
+
+    @Test
+    fun `createMockResponse 는 5xx mock 을 throw 없이 반환한다`() {
+        val (requestData, _) = exchange("https://api.example.com/x")
+
+        val mock = adapter.createMockResponse(requestData, CachedResponse(code = 500, body = "server error"))
+
+        assertEquals(500, mock.status.value)
+        val body = runBlocking { mock.bodyAsText() }
+        assertEquals("server error", body)
+    }
+
+    @Test
+    fun `createMockResponse 반복 호출은 예외 없이 안정적으로 동작한다`() {
+        val (requestData, _) = exchange("https://api.example.com/x")
+
+        repeat(100) { i ->
+            val mock = adapter.createMockResponse(requestData, CachedResponse(code = 200, body = "body-$i"))
+            assertEquals(200, mock.status.value)
+            assertEquals("body-$i", runBlocking { mock.bodyAsText() })
+        }
+    }
+
+    @Test
+    fun `extractResponseData 호출 후에도 원본 응답 본문을 다시 읽을 수 있다`() {
+        val (_, response) = exchange("https://api.example.com/x", responseBody = "downstream-body")
+
+        val resp = adapter.extractResponseData(response)
+        assertEquals("downstream-body", resp.body)
+
+        // call.save() 로 비소비 읽기를 했으므로 다운스트림이 본문을 다시 읽을 수 있어야 한다.
+        val reread = runBlocking { response.bodyAsText() }
+        assertEquals("downstream-body", reread)
+    }
 }
