@@ -17,6 +17,7 @@ serializationJson = "1.7.3"
 gson = "2.11.0"
 ktor = "3.0.0"
 mockk = "1.13.8"
+coroutines = "1.9.0"
 
 [libraries]
 # AndroidX
@@ -67,6 +68,9 @@ jetbrains-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name =
 
 # Gson
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+# Coroutines
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 
 # Ktor
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
