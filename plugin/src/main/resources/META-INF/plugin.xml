@@ -1,0 +1,19 @@
+<idea-plugin>
+    <id>net.spooncast.openmocker.plugin</id>
+    <name>OpenMocker</name>
+    <vendor>Spooncast</vendor>
+    <description><![CDATA[
+        Desktop control panel for the OpenMocker library — edit REST mocks and fire
+        WebSocket events on a connected Android device.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- 빈 ToolWindow 골격. REST/WS 패널은 T14/T15 에서 채운다. -->
+        <toolWindow
+            id="OpenMocker"
+            anchor="right"
+            factoryClass="net.spooncast.openmocker.plugin.ui.MockerToolWindowFactory" />
+    </extensions>
+</idea-plugin>
