@@ -24,6 +24,10 @@ dependencies {
         create(IntelliJPlatformType.IntellijIdeaCommunity, "2024.2.5")
         testFramework(TestFrameworkType.Platform)
     }
+
+    // BasePlatformTestCase(플랫폼 컨테이너 부팅 테스트)의 단언이 opentest4j 를 요구하나 플랫폼이
+    // 런타임 제공하지 않아 명시한다. 테스트 전용 — 플러그인 런타임 의존성 0 원칙엔 영향 없다.
+    testRuntimeOnly("org.opentest4j:opentest4j:1.3.0")
 }
 
 intellijPlatform {

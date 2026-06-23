@@ -15,5 +15,12 @@
             id="OpenMocker"
             anchor="right"
             factoryClass="net.spooncast.openmocker.plugin.ui.MockerToolWindowFactory" />
+
+        <!-- 설정 영속화는 @Service(MockerSettings)라 무등록. Settings UI 만 등록한다. -->
+        <applicationConfigurable
+            parentId="tools"
+            id="net.spooncast.openmocker.settings"
+            displayName="OpenMocker"
+            instance="net.spooncast.openmocker.plugin.settings.MockerConfigurable" />
     </extensions>
 </idea-plugin>
