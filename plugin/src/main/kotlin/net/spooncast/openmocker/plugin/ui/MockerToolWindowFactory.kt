@@ -12,9 +12,12 @@ class MockerToolWindowFactory : ToolWindowFactory {
         val settings = MockerSettings.getInstance().state
         val client = ControlClient(port = settings.port)
         val restPanel = RestPanel(client)
+        val wsPanel = WsPanel(client)
 
-        val content = toolWindow.contentManager.factory.createContent(restPanel, "REST", false)
-        toolWindow.contentManager.addContent(content)
+        val restContent = toolWindow.contentManager.factory.createContent(restPanel, "REST", false)
+        val wsContent = toolWindow.contentManager.factory.createContent(wsPanel, "WebSocket", false)
+        toolWindow.contentManager.addContent(restContent)
+        toolWindow.contentManager.addContent(wsContent)
 
         toolWindow.contentManager.addContentManagerListener(object :
             com.intellij.ui.content.ContentManagerListener {
