@@ -10,11 +10,14 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="net.spooncast.openmocker.plugin.session.MockerSession" />
         <!-- 빈 ToolWindow 골격. REST/WS 패널은 T14/T15 에서 채운다. -->
         <toolWindow
             id="OpenMocker"
             anchor="right"
             factoryClass="net.spooncast.openmocker.plugin.ui.MockerToolWindowFactory" />
+
+        <notificationGroup id="OpenMocker" displayType="BALLOON" />
 
         <!-- 설정 영속화는 @Service(MockerSettings)라 무등록. Settings UI 만 등록한다. -->
         <applicationConfigurable
