@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -6,6 +8,15 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
 }
+
+// secrets.properties (VCS 미추적) 에서 API key 를 읽어 BuildConfig 로 노출한다.
+val secretsFile = rootProject.file("secrets.properties")
+val secrets = Properties().apply {
+    if (secretsFile.exists()) {
+        secretsFile.inputStream().use { load(it) }
+    }
+}
+val weatherApiAppId: String = secrets.getProperty("WEATHER_API_APP_ID", "")
 
 android {
     namespace = "net.spooncast.openmocker.demo"
@@ -22,6 +33,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "WEATHER_API_APP_ID", "\"$weatherApiAppId\"")
     }
 
     buildTypes {

@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import net.spooncast.openmocker.demo.BuildConfig
 import net.spooncast.openmocker.demo.model.RespWeather
 import javax.inject.Inject
 
@@ -14,7 +15,7 @@ class KtorWeatherApiService @Inject constructor(
         return client.get("https://api.openweathermap.org/data/2.5/weather") {
             parameter("lat", "44.34")
             parameter("lon", "10.99")
-            parameter("appid", "")
+            parameter("appid", BuildConfig.WEATHER_API_APP_ID)
         }.body()
     }
 }
