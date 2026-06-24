@@ -36,4 +36,7 @@ class WsEventSink(
     override fun received(): List<ReceivedMessage> = client.recentReceived().map { frame ->
         ReceivedMessage(seq = frame.seq, payload = frame.payload)
     }
+
+    // 수신 이력 비우기도 client 에 위임한다 — REST 의 전체 Clear 와 동일하게 플러그인이 호출한다.
+    override fun clearReceived() = client.clearRecent()
 }

@@ -209,6 +209,28 @@ class ControlClientTest {
     }
 
     @Test
+    fun `clearReceived sends DELETE to sink received path`() {
+        stub("/inject/demo/received", 200, """{"ok":true}""")
+
+        val result = client.clearReceived("demo")
+
+        assertTrue(result.isSuccess)
+        val req = captured["/inject/demo/received"]!!
+        assertEquals("DELETE", req.method)
+        assertEquals("/inject/demo/received", req.path)
+    }
+
+    @Test
+    fun `clearReceived returns failure for unknown sink`() {
+        stub("/inject/ghost/received", 404, """{"ok":false,"error":"unknown sink: ghost"}""")
+
+        val result = client.clearReceived("ghost")
+
+        assertTrue(result.isFailure)
+        assertEquals(404, (result.exceptionOrNull() as ControlClientException).statusCode)
+    }
+
+    @Test
     fun `inject posts raw payload unchanged to sink id`() {
         // /inject/sinks 보다 짧은 prefix 컨텍스트 — HttpServer 는 최장 prefix 매칭이므로 분리됨
         stub("/inject/", 200, """{"ok":true}""")

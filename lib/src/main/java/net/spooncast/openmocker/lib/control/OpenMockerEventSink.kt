@@ -30,6 +30,15 @@ interface OpenMockerEventSink {
      * 수신 이력을 보관하지 않는다. 기록하지 않는 sink 는 기본 구현(빈 목록)을 그대로 쓰면 된다(opt-in).
      */
     fun received(): List<ReceivedMessage> = emptyList()
+
+    /**
+     * sink 의 수신 이력 버퍼를 비운다. 플러그인 UI 가 `DELETE /inject/{id}/received` 로 호출해
+     * REST 의 "전체 Clear" 와 동일하게 수신 목록을 초기화하는 데 쓴다.
+     *
+     * [received] 와 마찬가지로 보관은 sink 구현(앱)의 책임이라, 비우는 동작도 구현이 맡는다.
+     * 이력을 기록하지 않는 sink 는 기본 구현(no-op)을 그대로 쓰면 된다(opt-in).
+     */
+    fun clearReceived() = Unit
 }
 
 /** 미리 정의된 주입 payload. [OpenMockerEventSink.presets] 가 반환한다. */
