@@ -8,7 +8,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-        <b>0.1.0</b> — first internal release.
+        <b>0.1.0-beta1</b> — first internal beta.
         <ul>
             <li>Tool window control panel for a connected Android device (REST + WebSocket).</li>
             <li>Device dropdown with automatic <code>adb forward</code>.</li>
