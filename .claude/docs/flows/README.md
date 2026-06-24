@@ -8,7 +8,7 @@
 
 | 파일 | 한 줄 요약 | 적용 시점 | 갱신일 |
 |---|---|---|---|
-| _(아직 항목 없음)_ | | | |
+| [wire-sink-to-app-feature.md](wire-sink-to-app-feature.md) | inject sink 를 앱 기능·화면에 잇는 순서(seam→singleton→sink→EntryPoint 배선→구독) | inject 이벤트를 앱 기능으로 모킹/시연할 때 | 2026-06-24 | |
 
 ## 항목 작성 템플릿
 

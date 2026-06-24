@@ -1,22 +1,41 @@
 package net.spooncast.openmocker.demo.di
 
 import android.app.Application
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.components.SingletonComponent
 import net.spooncast.openmocker.demo.BuildConfig
-import net.spooncast.openmocker.demo.DemoEventSink
+import net.spooncast.openmocker.demo.WsEventSink
+import net.spooncast.openmocker.demo.repo.DemoChatSocketClient
 import net.spooncast.openmocker.lib.OpenMocker
 
 @HiltAndroidApp
 class DemoApplication: Application() {
 
+    /**
+     * Hilt 그래프 밖(Application.onCreate)에서 싱글톤 [DemoChatSocketClient] 를 꺼내기 위한 진입점.
+     * sink(주입 측)와 ViewModel(구독 측)이 같은 인스턴스를 공유해야 inject 가 화면에 도달한다.
+     */
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface DemoEntryPoint {
+        fun chatSocketClient(): DemoChatSocketClient
+    }
+
     override fun onCreate() {
         super.onCreate()
 
-        // debug 빌드에서만 임베디드 제어 서버를 띄우고 데모 sink 를 등록한다.
-        // 이 레포만으로 M0 제어 서버를 curl E2E 검증할 수 있게 하는 배선이다.
+        // debug 빌드에서만 임베디드 제어 서버를 띄우고, 주입을 실시간 스트림으로 잇는 sink 를 등록한다.
+        // 플러그인/curl 의 POST /inject/demo → WsEventSink → DemoChatSocketClient → Realtime 화면.
         if (BuildConfig.DEBUG) {
             OpenMocker.startControlServer()
-            OpenMocker.registerSink(DemoEventSink())
+
+            val client = EntryPointAccessors
+                .fromApplication(this, DemoEntryPoint::class.java)
+                .chatSocketClient()
+            OpenMocker.registerSink(WsEventSink(client))
         }
     }
 }
