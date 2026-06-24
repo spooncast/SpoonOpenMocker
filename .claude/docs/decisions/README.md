@@ -7,7 +7,7 @@
 
 | 파일 | 한 줄 요약 | 상태 | 갱신일 |
 |---|---|---|---|
-| _(아직 항목 없음)_ | | | |
+| [plugin-distribution-internal-zip.md](plugin-distribution-internal-zip.md) | 플러그인은 사내 zip 수동 배포(마켓플레이스 X), untilBuild 개방형 | 채택됨 | 2026-06-24 |
 
 ## 항목 작성 템플릿
 

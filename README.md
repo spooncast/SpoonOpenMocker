@@ -174,7 +174,20 @@ fire WebSocket events without leaving the IDE. It talks to the library's control
 
 1. The app integrates the library and calls `OpenMocker.startControlServer()` (see [Quick Start](#quick-start)).
 2. The app is running on a connected device/emulator (debug build).
-3. The OpenMocker plugin is installed in Android Studio / IntelliJ.
+3. The OpenMocker plugin is installed in Android Studio / IntelliJ (see below).
+
+**Installing the plugin**
+
+The plugin is distributed internally as a `.zip` (it is **not** published to the JetBrains Marketplace).
+
+1. Get the latest `openmocker-plugin-<version>.zip` from the team (shared drive / chat), or build it
+   yourself (see [Building & distributing](#building--distributing-the-plugin-internal)).
+2. In Android Studio / IntelliJ open **Settings → Plugins → ⚙️ → Install Plugin from Disk…** and pick
+   the `.zip`.
+3. Restart the IDE when prompted.
+
+> Requires a build **242 or newer** (Android Studio Ladybug 2024.2+ / IntelliJ IDEA 2024.2+). There is
+> no upper bound, so newer IDE versions are supported without reinstalling a rebuilt plugin.
 
 **Usage**
 
@@ -206,6 +219,29 @@ Because it's a plain HTTP API, you can also drive it from `curl` for scripting:
 adb forward tcp:8099 tcp:8099
 curl -X POST localhost:8099/inject/chat -d '{"event":"chat","text":"hello"}'
 ```
+
+### Building & distributing the plugin (internal)
+
+The plugin lives in `plugin/` as a standalone Gradle build. To produce a distributable archive:
+
+```bash
+cd plugin
+./gradlew buildPlugin
+```
+
+This writes `plugin/build/distributions/openmocker-plugin-<version>.zip`. Share that `.zip` with the
+team and install it via **Install Plugin from Disk…** (see [Installing the plugin](#ide-plugin-android-studio--intellij)).
+
+Optional checks before sharing:
+
+```bash
+./gradlew verifyPluginStructure   # validate plugin.xml + archive layout (fast)
+./gradlew verifyPlugin            # run the IntelliJ Plugin Verifier (downloads target IDEs)
+```
+
+Distribution is **manual zip sharing**; the JetBrains Marketplace is not used. Hosting an internal
+plugin repository (`updatePlugins.xml`) for in-IDE auto-updates, and signing the archive
+(`./gradlew signPlugin`), are possible future options but are not set up today.
 
 ## How It Works
 

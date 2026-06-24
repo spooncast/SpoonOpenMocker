@@ -7,6 +7,16 @@
         WebSocket events on a connected Android device.
     ]]></description>
 
+    <change-notes><![CDATA[
+        <b>0.1.0</b> — first internal release.
+        <ul>
+            <li>Tool window control panel for a connected Android device (REST + WebSocket).</li>
+            <li>Device dropdown with automatic <code>adb forward</code>.</li>
+            <li>REST tab: poll recorded requests, edit/save mocks, un-mock or clear all.</li>
+            <li>WebSocket tab: pick a sink, fire preset or custom payloads, list received frames.</li>
+        </ul>
+    ]]></change-notes>
+
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
