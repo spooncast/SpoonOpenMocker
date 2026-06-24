@@ -8,7 +8,7 @@
 
 | 파일 | 한 줄 요약 | 상태 | 갱신일 |
 |---|---|---|---|
-| _(아직 항목 없음)_ | | | |
+| [ws-inject-demo.md](ws-inject-demo.md) | 플러그인 Inject 를 데모 화면에서 관찰 — sink→ChatSocketClient seam→Realtime 탭 | 구현 완료 | 2026-06-24 | |
 
 ## 항목 작성 템플릿
 
