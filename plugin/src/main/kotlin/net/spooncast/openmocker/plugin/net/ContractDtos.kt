@@ -42,24 +42,17 @@ data class MockRequest(
     val duration: Long = 0L,
 )
 
-/** `GET /inject/sinks` 응답 한 항목. 등록된 sink 의 노출 정보. */
-data class Sink(
+/** `GET /inject/injectors` 응답 한 항목. 등록된 injector 의 노출 정보. */
+data class Injector(
     val id: String,
     val name: String,
-    val presets: List<Preset>,
-)
-
-/** sink 가 제공하는 미리 정의된 주입 payload. */
-data class Preset(
-    val name: String,
-    val payload: String,
 )
 
 /**
- * `GET /inject/{id}/received` 응답 한 항목. sink 가 수신한 프레임(일련번호 + 원문).
- * :lib 의 `ReceivedMessageDto` 와 필드명이 1:1 로 일치해야 한다(Gson 키 매칭).
+ * `GET /inject/{id}/recorded` 응답 한 항목. injector 가 수신한 프레임(일련번호 + 원문).
+ * :lib 의 `RecordedMessageDto` 와 필드명이 1:1 로 일치해야 한다(Gson 키 매칭).
  */
-data class ReceivedMessage(
-    val seq: Long,
+data class RecordedMessage(
+    val sequence: Long,
     val payload: String,
 )

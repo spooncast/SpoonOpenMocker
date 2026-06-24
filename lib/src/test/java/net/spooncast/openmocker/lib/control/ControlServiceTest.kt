@@ -19,23 +19,21 @@ class ControlServiceTest {
 
     private val cacheRepo = mockk<CacheRepo>(relaxed = true)
 
-    // SinkRegistry 는 object 싱글톤이므로 각 테스트 전에 상태를 비운다.
-    private val service = ControlService(cacheRepo, SinkRegistry)
+    // EventInjectorRegistry 는 object 싱글톤이므로 각 테스트 전에 상태를 비운다.
+    private val service = ControlService(cacheRepo, EventInjectorRegistry)
 
     @BeforeEach
     fun setUp() {
-        SinkRegistry.clear()
+        EventInjectorRegistry.clear()
     }
 
-    private fun fakeSink(
+    private fun fakeInjector(
         id: String,
         name: String = id,
-        presets: List<Preset> = emptyList(),
-    ) = object : OpenMockerEventSink {
+    ) = object : OpenMockerEventInjector {
         override val id: String = id
         override val name: String = name
         override fun inject(payload: String) = Unit
-        override fun presets(): List<Preset> = presets
     }
 
     @Test
@@ -107,72 +105,61 @@ class ControlServiceTest {
     }
 
     @Test
-    fun `sinks 는 등록된 sink 와 preset 을 DTO 로 변환한다`() {
-        SinkRegistry.register(
-            fakeSink(
-                id = "wala",
-                name = "WALA",
-                presets = listOf(Preset("room_close", "{\"type\":\"close\"}")),
-            ),
-        )
+    fun `injectors 는 등록된 injector 를 DTO 로 변환한다`() {
+        EventInjectorRegistry.register(fakeInjector(id = "wala", name = "WALA"))
 
-        val sinks = service.sinks()
+        val injectors = service.injectors()
 
-        assertEquals(1, sinks.size)
-        val dto = sinks.first()
+        assertEquals(1, injectors.size)
+        val dto = injectors.first()
         assertEquals("wala", dto.id)
         assertEquals("WALA", dto.name)
-        assertEquals(1, dto.presets.size)
-        assertEquals("room_close", dto.presets.first().name)
-        assertEquals("{\"type\":\"close\"}", dto.presets.first().payload)
     }
 
     @Test
-    fun `received 는 등록된 sink 의 수신 프레임을 DTO 로 변환한다`() {
-        SinkRegistry.register(object : OpenMockerEventSink {
+    fun `recorded(id) 는 등록된 injector 의 수신 프레임을 DTO 로 변환한다`() {
+        EventInjectorRegistry.register(object : OpenMockerEventInjector {
             override val id: String = "wala"
             override val name: String = "WALA"
             override fun inject(payload: String) = Unit
-            override fun presets(): List<Preset> = emptyList()
-            override fun received(): List<ReceivedMessage> = listOf(
-                ReceivedMessage(seq = 2L, payload = "{\"event\":\"chat\"}"),
-                ReceivedMessage(seq = 1L, payload = "{\"event\":\"tick\"}"),
+            override fun recorded(): List<RecordedMessage> = listOf(
+                RecordedMessage(sequence = 2L, payload = "{\"event\":\"chat\"}"),
+                RecordedMessage(sequence = 1L, payload = "{\"event\":\"tick\"}"),
             )
         })
 
-        val received = service.received("wala")
+        val recorded = service.recorded("wala")
 
-        assertEquals(2, received?.size)
-        assertEquals(2L, received?.first()?.seq)
-        assertEquals("{\"event\":\"chat\"}", received?.first()?.payload)
-        assertEquals(1L, received?.get(1)?.seq)
-        assertEquals("{\"event\":\"tick\"}", received?.get(1)?.payload)
+        assertEquals(2, recorded?.size)
+        assertEquals(2L, recorded?.first()?.sequence)
+        assertEquals("{\"event\":\"chat\"}", recorded?.first()?.payload)
+        assertEquals(1L, recorded?.get(1)?.sequence)
+        assertEquals("{\"event\":\"tick\"}", recorded?.get(1)?.payload)
     }
 
     @Test
-    fun `received 는 기록하지 않는 sink 면 빈 목록을 반환한다`() {
-        SinkRegistry.register(fakeSink(id = "demo"))
+    fun `recorded(id) 는 기록하지 않는 injector 면 빈 목록을 반환한다`() {
+        EventInjectorRegistry.register(fakeInjector(id = "demo"))
 
-        val received = service.received("demo")
+        val recorded = service.recorded("demo")
 
-        assertEquals(emptyList<Any>(), received)
+        assertEquals(emptyList<Any>(), recorded)
     }
 
     @Test
-    fun `received 는 미등록 id 면 null 을 반환한다`() {
-        val received = service.received("unknown")
+    fun `recorded(id) 는 미등록 id 면 null 을 반환한다`() {
+        val recorded = service.recorded("unknown")
 
-        assertNull(received)
+        assertNull(recorded)
     }
 
     @Test
-    fun `inject 는 등록된 sink 에 payload 를 전달하고 true 를 반환한다`() {
+    fun `inject 는 등록된 injector 에 payload 를 전달하고 true 를 반환한다`() {
         var injected: String? = null
-        SinkRegistry.register(object : OpenMockerEventSink {
+        EventInjectorRegistry.register(object : OpenMockerEventInjector {
             override val id: String = "wala"
             override val name: String = "WALA"
             override fun inject(payload: String) { injected = payload }
-            override fun presets(): List<Preset> = emptyList()
         })
 
         val result = service.inject("wala", "raw-payload")
@@ -189,25 +176,24 @@ class ControlServiceTest {
     }
 
     @Test
-    fun `clearReceived 는 등록된 sink 의 clearReceived 를 호출하고 true 를 반환한다`() {
+    fun `clearRecorded 는 등록된 injector 의 clearRecorded 를 호출하고 true 를 반환한다`() {
         var cleared = false
-        SinkRegistry.register(object : OpenMockerEventSink {
+        EventInjectorRegistry.register(object : OpenMockerEventInjector {
             override val id: String = "wala"
             override val name: String = "WALA"
             override fun inject(payload: String) = Unit
-            override fun presets(): List<Preset> = emptyList()
-            override fun clearReceived() { cleared = true }
+            override fun clearRecorded() { cleared = true }
         })
 
-        val result = service.clearReceived("wala")
+        val result = service.clearRecorded("wala")
 
         assertTrue(result)
         assertTrue(cleared)
     }
 
     @Test
-    fun `clearReceived 는 미등록 id 면 false 를 반환한다`() {
-        val result = service.clearReceived("unknown")
+    fun `clearRecorded 는 미등록 id 면 false 를 반환한다`() {
+        val result = service.clearRecorded("unknown")
 
         assertFalse(result)
     }

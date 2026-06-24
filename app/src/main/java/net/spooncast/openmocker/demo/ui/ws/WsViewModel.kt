@@ -14,7 +14,7 @@ import javax.inject.Inject
 /**
  * [ChatSocketClient.incoming] 을 구독해 수신 메시지를 화면 상태로 누적한다.
  *
- * 데모에서는 OpenMocker sink([net.spooncast.openmocker.demo.WsEventSink])가 주입한 payload 가
+ * 데모에서는 OpenMocker injector([net.spooncast.openmocker.demo.DemoEventInjector])가 주입한 payload 가
  * 이 스트림으로 도착한다 — 즉 플러그인 Inject 가 곧 여기 표시되는 메시지가 된다.
  */
 @HiltViewModel

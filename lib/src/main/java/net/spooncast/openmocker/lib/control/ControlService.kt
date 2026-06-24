@@ -2,23 +2,22 @@ package net.spooncast.openmocker.lib.control
 
 import net.spooncast.openmocker.lib.control.dto.MockRequestDto
 import net.spooncast.openmocker.lib.control.dto.MockDto
-import net.spooncast.openmocker.lib.control.dto.PresetDto
-import net.spooncast.openmocker.lib.control.dto.ReceivedMessageDto
+import net.spooncast.openmocker.lib.control.dto.InjectorDto
+import net.spooncast.openmocker.lib.control.dto.RecordedMessageDto
 import net.spooncast.openmocker.lib.control.dto.RecordedEntryDto
 import net.spooncast.openmocker.lib.control.dto.ResponseDto
-import net.spooncast.openmocker.lib.control.dto.SinkDto
 import net.spooncast.openmocker.lib.data.repo.CacheRepo
 import net.spooncast.openmocker.lib.model.CachedKey
 
 /**
  * 제어 contract 의 도메인 동작을 담당한다. HTTP/소켓/직렬화는 모르고([ControlServer] 책임),
- * [CacheRepo] 와 [SinkRegistry] 호출로 각 라우트를 매핑하며 내부 모델 ↔ DTO 변환만 수행한다.
+ * [CacheRepo] 와 [EventInjectorRegistry] 호출로 각 라우트를 매핑하며 내부 모델 ↔ DTO 변환만 수행한다.
  *
  * HTTP 와 분리되어 있어 순수 단위 테스트가 가능하다.
  */
 internal class ControlService(
     private val cacheRepo: CacheRepo,
-    private val sinkRegistry: SinkRegistry = SinkRegistry,
+    private val injectorRegistry: EventInjectorRegistry = EventInjectorRegistry,
 ) {
 
     /**
@@ -68,47 +67,44 @@ internal class ControlService(
         cacheRepo.clearCache()
     }
 
-    /** `GET /inject/sinks` — 등록된 sink 목록을 DTO 로 반환한다. */
-    fun sinks(): List<SinkDto> {
-        return sinkRegistry.all().map { sink ->
-            SinkDto(
-                id = sink.id,
-                name = sink.name,
-                presets = sink.presets().map { preset ->
-                    PresetDto(name = preset.name, payload = preset.payload)
-                },
+    /** `GET /inject/injectors` — 등록된 injector 목록을 DTO 로 반환한다. */
+    fun injectors(): List<InjectorDto> {
+        return injectorRegistry.all().map { injector ->
+            InjectorDto(
+                id = injector.id,
+                name = injector.name,
             )
         }
     }
 
     /**
-     * `GET /inject/{id}/received` — 해당 sink 가 수신한 프레임 목록을 DTO 로 반환한다.
-     * 등록되지 않은 id 면 null(→ 라우터가 404 로 변환). sinks() 의 preset 매핑과 동일한 형태다.
+     * `GET /inject/{id}/recorded` — 해당 injector 가 수신한 프레임 목록을 DTO 로 반환한다.
+     * 등록되지 않은 id 면 null(→ 라우터가 404 로 변환).
      */
-    fun received(id: String): List<ReceivedMessageDto>? {
-        val sink = sinkRegistry.get(id) ?: return null
-        return sink.received().map { msg ->
-            ReceivedMessageDto(seq = msg.seq, payload = msg.payload)
+    fun recorded(id: String): List<RecordedMessageDto>? {
+        val injector = injectorRegistry.get(id) ?: return null
+        return injector.recorded().map { msg ->
+            RecordedMessageDto(sequence = msg.sequence, payload = msg.payload)
         }
     }
 
     /**
-     * `DELETE /inject/{id}/received` — 해당 sink 의 수신 이력 버퍼를 비운다(REST 의 전체 Clear 대응).
+     * `DELETE /inject/{id}/recorded` — 해당 injector 의 수신 이력 버퍼를 비운다(REST 의 전체 Clear 대응).
      * 등록되지 않은 id 면 false(→ 라우터가 404 로 변환).
      */
-    fun clearReceived(id: String): Boolean {
-        val sink = sinkRegistry.get(id) ?: return false
-        sink.clearReceived()
+    fun clearRecorded(id: String): Boolean {
+        val injector = injectorRegistry.get(id) ?: return false
+        injector.clearRecorded()
         return true
     }
 
     /**
-     * `POST /inject/{id}` — 해당 sink 에 raw payload 를 주입한다.
+     * `POST /inject/{id}` — 해당 injector 에 raw payload 를 주입한다.
      * 등록되지 않은 id 면 false 를 반환한다.
      */
     fun inject(id: String, payload: String): Boolean {
-        val sink = sinkRegistry.get(id) ?: return false
-        sink.inject(payload)
+        val injector = injectorRegistry.get(id) ?: return false
+        injector.inject(payload)
         return true
     }
 }

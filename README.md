@@ -11,7 +11,7 @@ Developed and maintained by **SpoonLabs Android Team**.
 ## Features
 
 - 🔌 **Multi-Client Support**: Works with both OkHttp (via Interceptor) and Ktor (via Plugin)
-- 🔁 **WebSocket / Event Injection**: Inject realtime events into your app through an `OpenMockerEventSink`
+- 🔁 **Event Injection**: Inject realtime events (WebSocket, SSE, FCM, polling — any transport) into your app through an `OpenMockerEventInjector`
 - 🖥️ **IDE Plugin**: Drive mocks from an Android Studio / IntelliJ tool window over a local control server
 - 💾 **Response Caching**: Automatically caches real API responses for later mocking
 - ⏱️ **Configurable Delays**: Simulate network latency with custom delay times
@@ -63,22 +63,23 @@ dependencies {
 SpoonOpenMocker can be driven two ways:
 
 - **Built-in Compose UI** — call `OpenMocker.show(context)` to manage mocks on the device itself.
-- **IDE Plugin** — manage mocks and inject WebSocket events from Android Studio / IntelliJ over a local control server (see [IDE Plugin](#ide-plugin-android-studio--intellij)).
+- **IDE Plugin** — manage mocks and inject realtime events from Android Studio / IntelliJ over a local control server (see [IDE Plugin](#ide-plugin-android-studio--intellij)).
 
-Pick whichever fits your workflow — both share the same in-memory mock store. To use the IDE plugin (and WebSocket injection), start the control server once in your `Application`:
+Pick whichever fits your workflow — both share the same in-memory mock store. To use the IDE plugin (and event injection), start the control server once in your `Application`:
 
 ```kotlin
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {                 // debug builds only
-            OpenMocker.startControlServer()      // binds loopback 127.0.0.1:8099
+            OpenMocker.control.start()           // binds loopback 127.0.0.1:8099
+            // OpenMocker.control.start(port = 9000)  // pick another port if 8099 is taken
         }
     }
 }
 ```
 
-> The control server binds to the loopback address only and is intended for **debug builds**. Call `OpenMocker.stopControlServer()` to stop it.
+> The control server binds to the loopback address only and is intended for **debug builds**. Call `OpenMocker.control.stop()` to stop it.
 
 ### OkHttp Integration
 
@@ -108,50 +109,49 @@ val client = HttpClient(Android) {
 }
 ```
 
-### WebSocket / Event Injection
+### Event Injection
 
-OpenMocker does not intercept WebSocket frames the way it does HTTP. Instead, your app exposes an
-**event sink** that the IDE plugin (or any `curl`) can push payloads into via `POST /inject/{id}`.
-Implement `OpenMockerEventSink` and register it once at startup:
+OpenMocker is **transport-agnostic** about realtime events — it does **not** intercept WebSocket
+frames the way it does HTTP. Instead, your app exposes an **event injector** that the IDE plugin
+(or any `curl`) can push raw payloads into via `POST /inject/{id}`. The same mechanism works for
+WebSocket, SSE, FCM, long-polling, or anything else — your injector decides how to deliver the payload.
+
+The easiest way is to extend `BufferedEventInjector`, which keeps a ring buffer of recorded frames
+(so the plugin can list and replay them) and auto-assigns each a `sequence` — you only implement
+`deliver`:
 
 ```kotlin
-class ChatEventSink(private val socket: MySocketClient) : OpenMockerEventSink {
-    override val id = "chat"                       // matches POST /inject/{id}
-    override val name = "Realtime Chat"            // shown in the plugin UI
-
+class ChatEventInjector(private val socket: MySocketClient) : BufferedEventInjector(
+    id = "chat",                                   // matches POST /inject/{id}; must be [A-Za-z0-9._-]
+    name = "Realtime Chat",                        // shown in the plugin UI
+) {
     // Raw payload is delivered as-is; your app decides how to interpret it.
-    override fun inject(payload: String) {
+    override fun deliver(payload: String) {
         socket.emit(payload)                       // feed it into your app's realtime stream
     }
-
-    // Optional: buttons the plugin shows for one-tap injection.
-    override fun presets() = listOf(
-        Preset(name = "chat", payload = """{"event":"chat","text":"hello"}"""),
-        Preset(name = "tick", payload = """{"event":"tick","price":1234}"""),
-    )
-
-    // Optional (opt-in): expose received frames so the plugin can list/replay them.
-    override fun received() = socket.recent().map { ReceivedMessage(seq = it.seq, payload = it.text) }
-    override fun clearReceived() = socket.clearRecent()
 }
 ```
 
-Register the sink alongside the control server:
+> Prefer the full interface? Implement `OpenMockerEventInjector` directly. `recorded()` and
+> `clearRecorded()` then default to no-ops (opt-in) — injectors that don't track history can leave
+> them as-is.
+
+Register the injector alongside the control server:
 
 ```kotlin
 override fun onCreate() {
     super.onCreate()
     if (BuildConfig.DEBUG) {
-        OpenMocker.startControlServer()
-        OpenMocker.registerSink(ChatEventSink(socketClient))   // unregisterSink(id) to remove
+        OpenMocker.control.start()
+        OpenMocker.control.registerInjector(ChatEventInjector(socketClient))   // unregisterInjector(id) to remove
     }
 }
 ```
 
 > **Tip:** Make the injection side and the consuming side (e.g. your `ViewModel`) share the **same
 > singleton** socket client, so a payload injected from the plugin flows straight into your UI.
-> `presets()`, `received()`, and `clearReceived()` are optional — sinks that don't track history can
-> use the default no-op implementations.
+> The injector `id` becomes a URL path segment (`/inject/{id}`), so it must match `[A-Za-z0-9._-]`;
+> registering an id with other characters throws `IllegalArgumentException`.
 
 ### Opening the Mocker UI
 
@@ -167,12 +167,12 @@ OpenMocker.showNotification(activity)
 ## IDE Plugin (Android Studio / IntelliJ)
 
 The OpenMocker plugin gives you a desktop control panel for a connected device — edit REST mocks and
-fire WebSocket events without leaving the IDE. It talks to the library's control server over a local
+fire realtime events without leaving the IDE. It talks to the library's control server over a local
 `adb` port forward.
 
 **Prerequisites**
 
-1. The app integrates the library and calls `OpenMocker.startControlServer()` (see [Quick Start](#quick-start)).
+1. The app integrates the library and calls `OpenMocker.control.start()` (see [Quick Start](#quick-start)).
 2. The app is running on a connected device/emulator (debug build).
 3. The OpenMocker plugin is installed in Android Studio / IntelliJ (see below).
 
@@ -196,9 +196,9 @@ The plugin is distributed internally as a `.zip` (it is **not** published to the
    (status bar: *Idle → Forwarding → Connected*).
 3. **REST tab** — inspect recorded HTTP requests, edit the response (status code / body / delay), and
    save to mock it. Un-mock a single entry or **Clear all** at once.
-4. **WebSocket tab** — pick a registered sink, send a preset or a custom payload (`POST /inject/{id}`),
-   and watch it land in the running app. Received frames are polled and listed when the sink opts in
-   via `received()`.
+4. **Event Injection tab** — pick a registered injector, type or edit a payload and send it
+   (`POST /inject/{id}`), and watch it land in the running app. Recorded frames are polled and listed;
+   select one to copy it back into the editor for a quick edit-and-replay.
 
 Under the hood the control server exposes a small loopback-only HTTP API:
 
@@ -208,10 +208,10 @@ Under the hood the control server exposes a small loopback-only HTTP API:
 | `POST` | `/rest/mock` | Create / update a mock |
 | `DELETE` | `/rest/mock?method=&path=` | Un-mock one entry |
 | `DELETE` | `/rest/mock?all=true` | Clear all records / mocks |
-| `GET` | `/inject/sinks` | List registered sinks |
-| `POST` | `/inject/{id}` | Inject a raw payload into a sink |
-| `GET` | `/inject/{id}/received` | List frames the sink received |
-| `DELETE` | `/inject/{id}/received` | Clear the sink's received buffer |
+| `GET` | `/inject/injectors` | List registered injectors |
+| `POST` | `/inject/{id}` | Inject a raw payload into an injector |
+| `GET` | `/inject/{id}/recorded` | List frames the injector recorded |
+| `DELETE` | `/inject/{id}/recorded` | Clear the injector's recorded buffer |
 
 Because it's a plain HTTP API, you can also drive it from `curl` for scripting:
 
@@ -385,7 +385,7 @@ Use the built-in UI to configure response delays per endpoint:
 ## Module Structure
 
 - **`lib/`**: The OpenMocker library (publishable artifact)
-- **`app/`**: Demo application with weather API + WebSocket examples
+- **`app/`**: Demo application with weather API + event injection (WebSocket) examples
 - **`plugin/`**: Android Studio / IntelliJ plugin (desktop control panel)
 
 ## Requirements

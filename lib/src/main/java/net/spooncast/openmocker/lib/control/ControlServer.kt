@@ -147,25 +147,25 @@ internal class ControlServer(
                 200 to json.encodeToString(OkDto())
             }
 
-            request.method == "GET" && path == "/inject/sinks" ->
-                200 to json.encodeToString(service.sinks())
+            request.method == "GET" && path == "/inject/injectors" ->
+                200 to json.encodeToString(service.injectors())
 
-            request.method == "GET" && path.startsWith("/inject/") && path.endsWith("/received") -> {
-                val id = path.removePrefix("/inject/").removeSuffix("/received")
-                val received = service.received(id)
-                if (received != null) {
-                    200 to json.encodeToString(received)
+            request.method == "GET" && path.startsWith("/inject/") && path.endsWith("/recorded") -> {
+                val id = path.removePrefix("/inject/").removeSuffix("/recorded")
+                val recorded = service.recorded(id)
+                if (recorded != null) {
+                    200 to json.encodeToString(recorded)
                 } else {
-                    404 to errorBody("unknown sink: $id")
+                    404 to errorBody("unknown injector: $id")
                 }
             }
 
-            request.method == "DELETE" && path.startsWith("/inject/") && path.endsWith("/received") -> {
-                val id = path.removePrefix("/inject/").removeSuffix("/received")
-                if (service.clearReceived(id)) {
+            request.method == "DELETE" && path.startsWith("/inject/") && path.endsWith("/recorded") -> {
+                val id = path.removePrefix("/inject/").removeSuffix("/recorded")
+                if (service.clearRecorded(id)) {
                     200 to json.encodeToString(OkDto())
                 } else {
-                    404 to errorBody("unknown sink: $id")
+                    404 to errorBody("unknown injector: $id")
                 }
             }
 
@@ -175,7 +175,7 @@ internal class ControlServer(
                 if (service.inject(id, request.body)) {
                     200 to json.encodeToString(OkDto())
                 } else {
-                    404 to errorBody("unknown sink: $id")
+                    404 to errorBody("unknown injector: $id")
                 }
             }
 
