@@ -71,6 +71,24 @@ class AdbService(
     }
 
     /**
+     * 사람이 읽기 좋은 기기명. 에뮬레이터(`emulator-*`)는 AVD 이름(`emu avd name`)을, 실기기는
+     * `getprop ro.product.model`(예: "Pixel 6a")을 돌려준다. UI 드롭다운 표시용이며 명령 대상
+     * 식별은 여전히 serial 로 한다. 조회 실패는 [Result.failure].
+     */
+    fun deviceName(serial: String): Result<String> = call {
+        if (serial.startsWith(EMULATOR_SERIAL_PREFIX)) {
+            val out = exec(listOf(resolveAdb(), "-s", serial, "emu", "avd", "name"))
+            parseEmuAvdName(out) ?: getProp(serial, PROP_MODEL)
+        } else {
+            getProp(serial, PROP_MODEL)
+        }
+    }
+
+    /** `adb -s <serial> shell getprop <prop>` 의 값(trim). */
+    private fun getProp(serial: String, prop: String): String =
+        exec(listOf(resolveAdb(), "-s", serial, "shell", "getprop", prop)).trim()
+
+    /**
      * adb 실행파일 경로를 결정한다. `ANDROID_HOME` → `ANDROID_SDK_ROOT` 의 `platform-tools/adb`
      * 가 실재하면 그 절대경로를, 둘 다 없으면 `PATH` 위임을 기대하고 `adb` 를 반환한다. 후보 SDK 가
      * 지정됐는데 실행파일이 없으면 [AdbException] 으로 실패시킨다(오타·미설치 조기 발견).
@@ -111,6 +129,21 @@ class AdbService(
 
         /** 정상 연결 상태 토큰. */
         const val STATE_DEVICE = "device"
+
+        /** 에뮬레이터 serial 접두사(예: `emulator-5554`). */
+        private const val EMULATOR_SERIAL_PREFIX = "emulator-"
+
+        /** 기기 모델명 시스템 프로퍼티 키(예: "Pixel 6a"). */
+        private const val PROP_MODEL = "ro.product.model"
+
+        /**
+         * `adb -s <serial> emu avd name` 출력에서 AVD 이름을 뽑는다. 출력은 보통
+         * `"<name>\nOK"` 형태라 빈 줄과 `OK` 종료 토큰을 건너뛴 첫 줄을 쓴다. 없으면 null.
+         */
+        fun parseEmuAvdName(output: String): String? =
+            output.lineSequence()
+                .map { it.trim() }
+                .firstOrNull { it.isNotEmpty() && it != "OK" }
 
         /** adb 탐색 시 우선순위대로 조회하는 SDK 루트 env 키. */
         private val SDK_ENV_KEYS = listOf("ANDROID_HOME", "ANDROID_SDK_ROOT")
