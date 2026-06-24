@@ -4,7 +4,10 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
+import com.intellij.ui.EditorNotificationPanel
+import com.intellij.ui.InlineBanner
 import com.intellij.ui.table.JBTable
+import com.intellij.util.ui.JBUI
 import net.spooncast.openmocker.plugin.net.ControlClient
 import net.spooncast.openmocker.plugin.net.MockRequest
 import net.spooncast.openmocker.plugin.net.RecordedEntry
@@ -32,8 +35,8 @@ class RestPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
     private val table = JBTable(tableModel).apply {
         selectionModel.selectionMode = ListSelectionModel.SINGLE_SELECTION
         setShowGrid(false)
-        columnModel.getColumn(2).maxWidth = 70
-        columnModel.getColumn(2).minWidth = 70
+        // 세 컬럼 모두 사용자가 드래그로 폭 조정 가능. preferredWidth 로 기존 기본 폭만 유지한다.
+        columnModel.getColumn(2).preferredWidth = 70
     }
 
     private val codeField = JBTextField(6)
@@ -52,19 +55,36 @@ class RestPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
     }
 
     init {
-        val toolbar = buildToolbar()
+        border = JBUI.Borders.empty(8)
         val splitPane = OnePixelSplitter(true, 0.6f).apply {
             firstComponent = JBScrollPane(table)
             secondComponent = buildEditPanel()
         }
 
-        add(toolbar, BorderLayout.NORTH)
+        add(buildHeader(), BorderLayout.NORTH)
         add(splitPane, BorderLayout.CENTER)
 
         wireActions()
     }
 
-    private fun buildToolbar(): JPanel = JPanel(FlowLayout(FlowLayout.LEFT, 4, 2)).apply {
+    // 기능 설명을 닫기 가능한 InlineBanner 로 최상단(툴바 위)에 둔다.
+    // 닫기는 세션 한정 — 배너를 제거할 뿐, 툴윈도우를 다시 열면 재등장한다.
+    // 박스 아래 8px 간격은 BorderLayout vgap 으로 줘 배너 자체 스타일은 건드리지 않는다.
+    private fun buildHeader(): JPanel = JPanel(BorderLayout(0, 8)).apply {
+        val banner = InlineBanner(
+            "앱이 보낸 HTTP 요청 목록입니다. 항목을 선택하면 응답(상태 코드·본문)을 원하는 값으로 바꿀 수 있습니다.",
+            EditorNotificationPanel.Status.Info,
+        ).showCloseButton(true)
+        banner.setCloseAction {
+            remove(banner)
+            revalidate()
+            repaint()
+        }
+        add(banner, BorderLayout.NORTH)
+        add(buildToolbar(), BorderLayout.CENTER)
+    }
+
+    private fun buildToolbar(): JPanel = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 2)).apply {
         add(refreshButton)
         add(clearAllButton)
     }
