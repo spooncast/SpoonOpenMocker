@@ -4,6 +4,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
+import com.intellij.openapi.ui.Messages
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.InlineBanner
 import com.intellij.ui.table.JBTable
@@ -147,22 +148,30 @@ class RestPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
 
         saveButton.addActionListener {
             val entry = editingEntry ?: return@addActionListener
-            val code = codeField.text.trim().toIntOrNull() ?: return@addActionListener
+            val raw = codeField.text.trim()
+            val code = raw.toIntOrNull()
+            if (code == null) {
+                Messages.showErrorDialog(this, "Status Code 는 숫자여야 합니다: '$raw'", "Mock 저장 실패")
+                return@addActionListener
+            }
             val body = bodyArea.text
-            client.upsertMock(MockRequest(method = entry.method, path = entry.path, code = code, body = body))
+            val result = client.upsertMock(MockRequest(method = entry.method, path = entry.path, code = code, body = body))
+            if (reportIfFailed(result, "Mock 저장 실패")) return@addActionListener
             refresh()
         }
 
         clearMockButton.addActionListener {
             val entry = editingEntry ?: return@addActionListener
-            client.clearMock(method = entry.method, path = entry.path)
+            val result = client.clearMock(method = entry.method, path = entry.path)
+            if (reportIfFailed(result, "Mock 해제 실패")) return@addActionListener
             editingEntry = null
             clearMockButton.isEnabled = false
             refresh()
         }
 
         clearAllButton.addActionListener {
-            client.clearAll()
+            val result = client.clearAll()
+            if (reportIfFailed(result, "전체 Clear 실패")) return@addActionListener
             editingEntry = null
             saveButton.isEnabled = false
             clearMockButton.isEnabled = false
@@ -175,6 +184,16 @@ class RestPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
     fun startPolling() {
         val intervalMs = MockerSettings.getInstance().state.pollIntervalMs.toLong()
         scheduler.scheduleAtFixedRate(::refresh, 0L, intervalMs, TimeUnit.MILLISECONDS)
+    }
+
+    /**
+     * [ControlClient] 호출 [Result] 가 실패면 에러 다이얼로그를 띄우고 true 를 반환한다.
+     * 제어 서버 미연결(adb forward 없음)·비2xx 응답 등 실패가 조용히 묻히지 않도록 한다.
+     */
+    private fun reportIfFailed(result: Result<Unit>, title: String): Boolean {
+        val cause = result.exceptionOrNull() ?: return false
+        Messages.showErrorDialog(this, cause.message ?: "알 수 없는 오류", title)
+        return true
     }
 
     private fun refresh() {
