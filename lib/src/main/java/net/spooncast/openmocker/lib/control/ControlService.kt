@@ -3,6 +3,7 @@ package net.spooncast.openmocker.lib.control
 import net.spooncast.openmocker.lib.control.dto.MockRequestDto
 import net.spooncast.openmocker.lib.control.dto.MockDto
 import net.spooncast.openmocker.lib.control.dto.PresetDto
+import net.spooncast.openmocker.lib.control.dto.ReceivedMessageDto
 import net.spooncast.openmocker.lib.control.dto.RecordedEntryDto
 import net.spooncast.openmocker.lib.control.dto.ResponseDto
 import net.spooncast.openmocker.lib.control.dto.SinkDto
@@ -77,6 +78,17 @@ internal class ControlService(
                     PresetDto(name = preset.name, payload = preset.payload)
                 },
             )
+        }
+    }
+
+    /**
+     * `GET /inject/{id}/received` — 해당 sink 가 수신한 프레임 목록을 DTO 로 반환한다.
+     * 등록되지 않은 id 면 null(→ 라우터가 404 로 변환). sinks() 의 preset 매핑과 동일한 형태다.
+     */
+    fun received(id: String): List<ReceivedMessageDto>? {
+        val sink = sinkRegistry.get(id) ?: return null
+        return sink.received().map { msg ->
+            ReceivedMessageDto(seq = msg.seq, payload = msg.payload)
         }
     }
 

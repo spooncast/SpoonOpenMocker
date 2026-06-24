@@ -54,3 +54,12 @@ data class Preset(
     val name: String,
     val payload: String,
 )
+
+/**
+ * `GET /inject/{id}/received` 응답 한 항목. sink 가 수신한 프레임(일련번호 + 원문).
+ * :lib 의 `ReceivedMessageDto` 와 필드명이 1:1 로 일치해야 한다(Gson 키 매칭).
+ */
+data class ReceivedMessage(
+    val seq: Long,
+    val payload: String,
+)

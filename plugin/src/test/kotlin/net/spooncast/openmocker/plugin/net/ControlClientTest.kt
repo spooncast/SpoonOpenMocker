@@ -174,6 +174,41 @@ class ControlClientTest {
     }
 
     @Test
+    fun `getReceived parses received frames newest-first`() {
+        val json = """
+            [{"seq":3,"payload":"{\"event\":\"chat\"}"},
+             {"seq":2,"payload":"{\"event\":\"tick\"}"},
+             {"seq":1,"payload":"raw"}]
+        """.trimIndent()
+        // /inject/sinks 와 분리되도록 더 긴 prefix 컨텍스트로 등록(HttpServer 최장 prefix 매칭).
+        stub("/inject/demo/received", 200, json)
+
+        val result = client.getReceived("demo")
+
+        assertTrue(result.isSuccess)
+        val received = result.getOrThrow()
+        assertEquals(3, received.size)
+        assertEquals(3L, received[0].seq)
+        assertEquals("""{"event":"chat"}""", received[0].payload)
+        assertEquals(1L, received[2].seq)
+        val req = captured["/inject/demo/received"]!!
+        assertEquals("GET", req.method)
+        assertEquals("/inject/demo/received", req.path)
+    }
+
+    @Test
+    fun `getReceived returns failure for unknown sink`() {
+        stub("/inject/ghost/received", 404, """{"ok":false,"error":"unknown sink: ghost"}""")
+
+        val result = client.getReceived("ghost")
+
+        assertTrue(result.isFailure)
+        val ex = result.exceptionOrNull()
+        assertTrue(ex is ControlClientException)
+        assertEquals(404, (ex as ControlClientException).statusCode)
+    }
+
+    @Test
     fun `inject posts raw payload unchanged to sink id`() {
         // /inject/sinks 보다 짧은 prefix 컨텍스트 — HttpServer 는 최장 prefix 매칭이므로 분리됨
         stub("/inject/", 200, """{"ok":true}""")

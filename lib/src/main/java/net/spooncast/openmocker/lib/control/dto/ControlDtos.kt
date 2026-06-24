@@ -62,6 +62,13 @@ internal data class PresetDto(
     val payload: String,
 )
 
+/** `GET /inject/{id}/received` 응답 한 항목. sink 가 수신한 프레임(일련번호 + 원문). */
+@Serializable
+internal data class ReceivedMessageDto(
+    val seq: Long,
+    val payload: String,
+)
+
 /** 성공 응답 공용 바디(`{"ok":true}`). */
 @Serializable
 internal data class OkDto(

@@ -150,6 +150,16 @@ internal class ControlServer(
             request.method == "GET" && path == "/inject/sinks" ->
                 200 to json.encodeToString(service.sinks())
 
+            request.method == "GET" && path.startsWith("/inject/") && path.endsWith("/received") -> {
+                val id = path.removePrefix("/inject/").removeSuffix("/received")
+                val received = service.received(id)
+                if (received != null) {
+                    200 to json.encodeToString(received)
+                } else {
+                    404 to errorBody("unknown sink: $id")
+                }
+            }
+
             request.method == "POST" && path.startsWith("/inject/") -> {
                 val id = path.removePrefix("/inject/")
                 // body 는 파싱 없이 통째 전달한다.

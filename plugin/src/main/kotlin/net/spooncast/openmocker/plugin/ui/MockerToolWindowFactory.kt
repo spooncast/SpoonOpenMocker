@@ -30,8 +30,18 @@ class MockerToolWindowFactory : ToolWindowFactory {
         val statusBar = StatusBar(project)
 
         session.registerPollingCallbacks(
-            start = { SwingUtilities.invokeLater { restPanel.startPolling() } },
-            stop = { SwingUtilities.invokeLater { restPanel.stopPolling() } },
+            start = {
+                SwingUtilities.invokeLater {
+                    restPanel.startPolling()
+                    wsPanel.startPolling()
+                }
+            },
+            stop = {
+                SwingUtilities.invokeLater {
+                    restPanel.stopPolling()
+                    wsPanel.stopPolling()
+                }
+            },
         )
 
         val sessionListener: (ConnectionState, String?) -> Unit = { state, error ->

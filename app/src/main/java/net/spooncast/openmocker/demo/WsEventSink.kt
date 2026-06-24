@@ -3,6 +3,7 @@ package net.spooncast.openmocker.demo
 import net.spooncast.openmocker.demo.repo.DemoChatSocketClient
 import net.spooncast.openmocker.lib.control.OpenMockerEventSink
 import net.spooncast.openmocker.lib.control.Preset
+import net.spooncast.openmocker.lib.control.ReceivedMessage
 
 /**
  * 제어 서버의 `POST /inject/demo` 로 주입된 payload 를, 데모의 실시간 메시지 스트림으로 흘려보내는 sink.
@@ -29,4 +30,10 @@ class WsEventSink(
         Preset(name = "tick", payload = """{"event":"tick","price":1234}"""),
         Preset(name = "notice", payload = """{"event":"notice","message":"서버 점검 예정"}"""),
     )
+
+    // 데모 소켓이 받은 실제 수신 프레임(최신순)을 그대로 노출한다. 보관은 client 의 책임이고,
+    // sink 는 client 의 ReceivedFrame 을 lib 계약 타입([ReceivedMessage])으로 매핑만 한다.
+    override fun received(): List<ReceivedMessage> = client.recentReceived().map { frame ->
+        ReceivedMessage(seq = frame.seq, payload = frame.payload)
+    }
 }
