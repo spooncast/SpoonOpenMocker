@@ -160,6 +160,7 @@ override fun onCreate() {
 OpenMocker.show(context)
 
 // Or show as notification (requires POST_NOTIFICATIONS permission)
+// On API 33+ the caller is responsible for requesting the runtime permission.
 OpenMocker.showNotification(activity)
 ```
 
@@ -356,7 +357,7 @@ Use the built-in UI to configure response delays per endpoint:
 ### Minimum Requirements
 
 - **Android**: API 28 (Android 9.0) or higher
-- **Kotlin**: 1.9.0 or higher
+- **Kotlin**: 2.2.0 or higher
 - **Java**: JDK 17 or higher
 
 ### Dependency Version Requirements
@@ -381,7 +382,7 @@ OpenMocker is compiled with the following dependency versions. Using lower versi
 ## License
 
 ```
-Copyright 2024 SpoonLabs Android Team
+Copyright 2024-2026 SpoonLabs Android Team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
