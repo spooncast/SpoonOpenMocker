@@ -72,6 +72,14 @@ class ControlClient(
         gson.fromJson<List<Sink>>(res.body(), type) ?: emptyList()
     }
 
+    /** `GET /inject/{id}/received` — 해당 sink 가 수신한 프레임 목록(최신순). 미등록 sink 면 404 → 실패. */
+    fun getReceived(id: String): Result<List<ReceivedMessage>> = call {
+        val res = send(newRequest("/inject/${encode(id)}/received").GET().build())
+        ensureSuccess(res)
+        val type = object : TypeToken<List<ReceivedMessage>>() {}.type
+        gson.fromJson<List<ReceivedMessage>>(res.body(), type) ?: emptyList()
+    }
+
     /** `POST /inject/{id}` — raw payload 를 파싱 없이 그대로 전달. 미등록 sink 면 404 → 실패. */
     fun inject(id: String, payload: String): Result<Unit> = call {
         val res = send(

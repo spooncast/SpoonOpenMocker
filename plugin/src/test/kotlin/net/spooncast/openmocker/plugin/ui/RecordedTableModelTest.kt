@@ -78,7 +78,7 @@ class RecordedTableModelTest {
     fun `컬럼 이름이 Method Path Mocked 순`() {
         assertEquals("Method", model.getColumnName(0))
         assertEquals("Path", model.getColumnName(1))
-        assertEquals("Mocked?", model.getColumnName(2))
+        assertEquals("Mocked", model.getColumnName(2))
     }
 
     private fun entry(method: String, path: String, mock: MockData? = null) =

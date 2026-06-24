@@ -128,6 +128,44 @@ class ControlServiceTest {
     }
 
     @Test
+    fun `received 는 등록된 sink 의 수신 프레임을 DTO 로 변환한다`() {
+        SinkRegistry.register(object : OpenMockerEventSink {
+            override val id: String = "wala"
+            override val name: String = "WALA"
+            override fun inject(payload: String) = Unit
+            override fun presets(): List<Preset> = emptyList()
+            override fun received(): List<ReceivedMessage> = listOf(
+                ReceivedMessage(seq = 2L, payload = "{\"event\":\"chat\"}"),
+                ReceivedMessage(seq = 1L, payload = "{\"event\":\"tick\"}"),
+            )
+        })
+
+        val received = service.received("wala")
+
+        assertEquals(2, received?.size)
+        assertEquals(2L, received?.first()?.seq)
+        assertEquals("{\"event\":\"chat\"}", received?.first()?.payload)
+        assertEquals(1L, received?.get(1)?.seq)
+        assertEquals("{\"event\":\"tick\"}", received?.get(1)?.payload)
+    }
+
+    @Test
+    fun `received 는 기록하지 않는 sink 면 빈 목록을 반환한다`() {
+        SinkRegistry.register(fakeSink(id = "demo"))
+
+        val received = service.received("demo")
+
+        assertEquals(emptyList<Any>(), received)
+    }
+
+    @Test
+    fun `received 는 미등록 id 면 null 을 반환한다`() {
+        val received = service.received("unknown")
+
+        assertNull(received)
+    }
+
+    @Test
     fun `inject 는 등록된 sink 에 payload 를 전달하고 true 를 반환한다`() {
         var injected: String? = null
         SinkRegistry.register(object : OpenMockerEventSink {
