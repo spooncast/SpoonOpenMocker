@@ -40,6 +40,9 @@ class MockerSession(@Suppress("UNUSED_PARAMETER") project: Project) {
 
     fun loadDevices(): Result<List<AdbService.AdbDevice>> = adb.devices()
 
+    /** 드롭다운 표시용 사람이 읽기 좋은 기기명. 실패 시 [Result.failure]. */
+    fun deviceName(serial: String): Result<String> = adb.deviceName(serial)
+
     fun selectDevice(serial: String?) {
         selectedSerial = serial
         MockerSettings.getInstance().state.lastDeviceSerial = serial ?: ""

@@ -9,6 +9,7 @@ import net.spooncast.openmocker.plugin.net.ControlClient
 import net.spooncast.openmocker.plugin.session.ConnectionState
 import net.spooncast.openmocker.plugin.session.MockerSession
 import net.spooncast.openmocker.plugin.settings.MockerSettings
+import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.JButton
@@ -45,11 +46,17 @@ class MockerToolWindowFactory : ToolWindowFactory {
         fun loadDevices() {
             Thread {
                 val result = session.loadDevices()
+                val onlineDevices = result.getOrNull()?.filter { it.isOnline }.orEmpty()
+                // 기기명은 EDT 밖에서 미리 조회한다. "<기기명> (<serial>)" 형식, 실패 시 serial 만.
+                val labels = onlineDevices.associate { device ->
+                    val name = session.deviceName(device.serial).getOrNull()?.takeIf { it.isNotBlank() }
+                    device.serial to (name?.let { "$it (${device.serial})" } ?: device.serial)
+                }
                 SwingUtilities.invokeLater {
                     deviceCombo.removeAllItems()
                     if (result.isSuccess) {
-                        devices = result.getOrThrow().filter { it.isOnline }
-                        devices.forEach { deviceCombo.addItem(it.serial) }
+                        devices = onlineDevices
+                        devices.forEach { deviceCombo.addItem(labels[it.serial]) }
                         val lastSerial = MockerSettings.getInstance().state.lastDeviceSerial
                         val idx = devices.indexOfFirst { it.serial == lastSerial }
                         if (idx >= 0) {
@@ -82,6 +89,7 @@ class MockerToolWindowFactory : ToolWindowFactory {
         }
 
         val toolbar = JPanel(FlowLayout(FlowLayout.LEFT, 4, 2)).apply {
+            border = JBUI.Borders.empty(8)
             add(JBLabel("기기:"))
             add(deviceCombo)
             add(refreshButton)

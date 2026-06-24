@@ -5,7 +5,7 @@ import javax.swing.table.AbstractTableModel
 
 class RecordedTableModel : AbstractTableModel() {
 
-    private val columns = arrayOf("Method", "Path", "Mocked?")
+    private val columns = arrayOf("Method", "Path", "Mocked")
     private var entries: List<RecordedEntry> = emptyList()
 
     fun update(newEntries: List<RecordedEntry>) {
