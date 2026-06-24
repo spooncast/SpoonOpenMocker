@@ -14,8 +14,8 @@ import java.net.URL
 /**
  * [OpenMocker] facade 의 제어 서버 배선 통합 테스트(티켓 #119 검증 항목).
  *
- * 실제 loopback 소켓을 띄워 검증한다: `startControlServer` 후 `GET /rest/recorded` 가 200 + JSON
- * 배열로 응답하고, `stopControlServer` 후에는 같은 요청이 연결에 실패한다.
+ * 실제 loopback 소켓을 띄워 검증한다: `control.start` 후 `GET /rest/recorded` 가 200 + JSON
+ * 배열로 응답하고, `control.stop` 후에는 같은 요청이 연결에 실패한다.
  */
 @Tag("integration")
 class OpenMockerControlFacadeTest {
@@ -23,7 +23,7 @@ class OpenMockerControlFacadeTest {
     @AfterEach
     fun tearDown() {
         // 테스트 격리: 서버가 떠 있으면 반드시 내린다.
-        OpenMocker.stopControlServer()
+        OpenMocker.control.stop()
     }
 
     /** OS 가 비어 있는 포트를 고르게 한 뒤 즉시 닫아 그 번호를 반환한다(고정 포트 충돌 회피). */
@@ -37,9 +37,9 @@ class OpenMockerControlFacadeTest {
         }
 
     @Test
-    fun `startControlServer 후 GET rest_recorded 가 200 JSON 배열로 응답한다`() {
+    fun `control_start 후 GET rest_recorded 가 200 JSON 배열로 응답한다`() {
         val port = freePort()
-        OpenMocker.startControlServer(port)
+        OpenMocker.control.start(port)
 
         val conn = get(port)
         try {
@@ -52,13 +52,13 @@ class OpenMockerControlFacadeTest {
     }
 
     @Test
-    fun `stopControlServer 후에는 연결에 실패한다`() {
+    fun `control_stop 후에는 연결에 실패한다`() {
         val port = freePort()
-        OpenMocker.startControlServer(port)
+        OpenMocker.control.start(port)
         // 떠 있는 동안에는 응답한다.
         get(port).also { assertEquals(200, it.responseCode) }.disconnect()
 
-        OpenMocker.stopControlServer()
+        OpenMocker.control.stop()
 
         // 내린 뒤에는 연결 자체가 실패한다(connection refused).
         assertThrows(IOException::class.java) {

@@ -35,7 +35,7 @@ class ControlServerTest {
     @Test
     fun `헤더 이름은 소문자로 정규화된다`() {
         val request = readHttpRequest(
-            streamOf("GET /inject/sinks HTTP/1.1\r\nContent-Type: application/json\r\n\r\n")
+            streamOf("GET /inject/injectors HTTP/1.1\r\nContent-Type: application/json\r\n\r\n")
         )
 
         assertEquals("application/json", request.headers["content-type"])

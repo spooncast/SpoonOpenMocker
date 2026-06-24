@@ -152,55 +152,50 @@ class ControlClientTest {
     }
 
     @Test
-    fun `getSinks parses sinks with presets`() {
+    fun `getInjectors parses injectors`() {
         val json = """
-            [{"id":"demo","name":"Demo Sink","presets":[
-               {"name":"p1","payload":"{\"a\":1}"},
-               {"name":"p2","payload":"raw"}]}]
+            [{"id":"demo","name":"Demo Injector"}]
         """.trimIndent()
-        stub("/inject/sinks", 200, json)
+        stub("/inject/injectors", 200, json)
 
-        val result = client.getSinks()
+        val result = client.getInjectors()
 
         assertTrue(result.isSuccess)
-        val sinks = result.getOrThrow()
-        assertEquals(1, sinks.size)
-        assertEquals("demo", sinks[0].id)
-        assertEquals("Demo Sink", sinks[0].name)
-        assertEquals(2, sinks[0].presets.size)
-        assertEquals("p1", sinks[0].presets[0].name)
-        assertEquals("""{"a":1}""", sinks[0].presets[0].payload)
-        assertEquals("GET", captured["/inject/sinks"]?.method)
+        val injectors = result.getOrThrow()
+        assertEquals(1, injectors.size)
+        assertEquals("demo", injectors[0].id)
+        assertEquals("Demo Injector", injectors[0].name)
+        assertEquals("GET", captured["/inject/injectors"]?.method)
     }
 
     @Test
-    fun `getReceived parses received frames newest-first`() {
+    fun `getRecorded parses recorded frames newest-first`() {
         val json = """
-            [{"seq":3,"payload":"{\"event\":\"chat\"}"},
-             {"seq":2,"payload":"{\"event\":\"tick\"}"},
-             {"seq":1,"payload":"raw"}]
+            [{"sequence":3,"payload":"{\"event\":\"chat\"}"},
+             {"sequence":2,"payload":"{\"event\":\"tick\"}"},
+             {"sequence":1,"payload":"raw"}]
         """.trimIndent()
-        // /inject/sinks 와 분리되도록 더 긴 prefix 컨텍스트로 등록(HttpServer 최장 prefix 매칭).
-        stub("/inject/demo/received", 200, json)
+        // /inject/injectors 와 분리되도록 더 긴 prefix 컨텍스트로 등록(HttpServer 최장 prefix 매칭).
+        stub("/inject/demo/recorded", 200, json)
 
-        val result = client.getReceived("demo")
+        val result = client.getRecorded("demo")
 
         assertTrue(result.isSuccess)
-        val received = result.getOrThrow()
-        assertEquals(3, received.size)
-        assertEquals(3L, received[0].seq)
-        assertEquals("""{"event":"chat"}""", received[0].payload)
-        assertEquals(1L, received[2].seq)
-        val req = captured["/inject/demo/received"]!!
+        val recorded = result.getOrThrow()
+        assertEquals(3, recorded.size)
+        assertEquals(3L, recorded[0].sequence)
+        assertEquals("""{"event":"chat"}""", recorded[0].payload)
+        assertEquals(1L, recorded[2].sequence)
+        val req = captured["/inject/demo/recorded"]!!
         assertEquals("GET", req.method)
-        assertEquals("/inject/demo/received", req.path)
+        assertEquals("/inject/demo/recorded", req.path)
     }
 
     @Test
-    fun `getReceived returns failure for unknown sink`() {
-        stub("/inject/ghost/received", 404, """{"ok":false,"error":"unknown sink: ghost"}""")
+    fun `getRecorded returns failure for unknown injector`() {
+        stub("/inject/ghost/recorded", 404, """{"ok":false,"error":"unknown injector: ghost"}""")
 
-        val result = client.getReceived("ghost")
+        val result = client.getRecorded("ghost")
 
         assertTrue(result.isFailure)
         val ex = result.exceptionOrNull()
@@ -209,30 +204,30 @@ class ControlClientTest {
     }
 
     @Test
-    fun `clearReceived sends DELETE to sink received path`() {
-        stub("/inject/demo/received", 200, """{"ok":true}""")
+    fun `clearRecorded sends DELETE to injector recorded path`() {
+        stub("/inject/demo/recorded", 200, """{"ok":true}""")
 
-        val result = client.clearReceived("demo")
+        val result = client.clearRecorded("demo")
 
         assertTrue(result.isSuccess)
-        val req = captured["/inject/demo/received"]!!
+        val req = captured["/inject/demo/recorded"]!!
         assertEquals("DELETE", req.method)
-        assertEquals("/inject/demo/received", req.path)
+        assertEquals("/inject/demo/recorded", req.path)
     }
 
     @Test
-    fun `clearReceived returns failure for unknown sink`() {
-        stub("/inject/ghost/received", 404, """{"ok":false,"error":"unknown sink: ghost"}""")
+    fun `clearRecorded returns failure for unknown injector`() {
+        stub("/inject/ghost/recorded", 404, """{"ok":false,"error":"unknown injector: ghost"}""")
 
-        val result = client.clearReceived("ghost")
+        val result = client.clearRecorded("ghost")
 
         assertTrue(result.isFailure)
         assertEquals(404, (result.exceptionOrNull() as ControlClientException).statusCode)
     }
 
     @Test
-    fun `inject posts raw payload unchanged to sink id`() {
-        // /inject/sinks 보다 짧은 prefix 컨텍스트 — HttpServer 는 최장 prefix 매칭이므로 분리됨
+    fun `inject posts raw payload unchanged to injector id`() {
+        // /inject/injectors 보다 짧은 prefix 컨텍스트 — HttpServer 는 최장 prefix 매칭이므로 분리됨
         stub("/inject/", 200, """{"ok":true}""")
 
         val raw = """{"temp":-5,"unit":"C"}"""
@@ -248,7 +243,7 @@ class ControlClientTest {
 
     @Test
     fun `non-2xx status becomes failure with ControlClientException`() {
-        stub("/inject/", 404, """{"ok":false,"error":"unknown sink: ghost"}""")
+        stub("/inject/", 404, """{"ok":false,"error":"unknown injector: ghost"}""")
 
         val result = client.inject(id = "ghost", payload = "{}")
 
@@ -256,7 +251,7 @@ class ControlClientTest {
         val ex = result.exceptionOrNull()
         assertTrue(ex is ControlClientException)
         assertEquals(404, (ex as ControlClientException).statusCode)
-        assertTrue(ex.responseBody.contains("unknown sink"))
+        assertTrue(ex.responseBody.contains("unknown injector"))
     }
 
     @Test

@@ -64,29 +64,29 @@ class ControlClient(
         ensureSuccess(res)
     }
 
-    /** `GET /inject/sinks` — 등록된 sink 목록. */
-    fun getSinks(): Result<List<Sink>> = call {
-        val res = send(newRequest("/inject/sinks").GET().build())
+    /** `GET /inject/injectors` — 등록된 injector 목록. */
+    fun getInjectors(): Result<List<Injector>> = call {
+        val res = send(newRequest("/inject/injectors").GET().build())
         ensureSuccess(res)
-        val type = object : TypeToken<List<Sink>>() {}.type
-        gson.fromJson<List<Sink>>(res.body(), type) ?: emptyList()
+        val type = object : TypeToken<List<Injector>>() {}.type
+        gson.fromJson<List<Injector>>(res.body(), type) ?: emptyList()
     }
 
-    /** `GET /inject/{id}/received` — 해당 sink 가 수신한 프레임 목록(최신순). 미등록 sink 면 404 → 실패. */
-    fun getReceived(id: String): Result<List<ReceivedMessage>> = call {
-        val res = send(newRequest("/inject/${encode(id)}/received").GET().build())
+    /** `GET /inject/{id}/recorded` — 해당 injector 가 수신한 프레임 목록(최신순). 미등록 injector 면 404 → 실패. */
+    fun getRecorded(id: String): Result<List<RecordedMessage>> = call {
+        val res = send(newRequest("/inject/${encode(id)}/recorded").GET().build())
         ensureSuccess(res)
-        val type = object : TypeToken<List<ReceivedMessage>>() {}.type
-        gson.fromJson<List<ReceivedMessage>>(res.body(), type) ?: emptyList()
+        val type = object : TypeToken<List<RecordedMessage>>() {}.type
+        gson.fromJson<List<RecordedMessage>>(res.body(), type) ?: emptyList()
     }
 
-    /** `DELETE /inject/{id}/received` — 해당 sink 의 수신 이력 버퍼를 비운다. 미등록 sink 면 404 → 실패. */
-    fun clearReceived(id: String): Result<Unit> = call {
-        val res = send(newRequest("/inject/${encode(id)}/received").DELETE().build())
+    /** `DELETE /inject/{id}/recorded` — 해당 injector 의 수신 이력 버퍼를 비운다. 미등록 injector 면 404 → 실패. */
+    fun clearRecorded(id: String): Result<Unit> = call {
+        val res = send(newRequest("/inject/${encode(id)}/recorded").DELETE().build())
         ensureSuccess(res)
     }
 
-    /** `POST /inject/{id}` — raw payload 를 파싱 없이 그대로 전달. 미등록 sink 면 404 → 실패. */
+    /** `POST /inject/{id}` — raw payload 를 파싱 없이 그대로 전달. 미등록 injector 면 404 → 실패. */
     fun inject(id: String, payload: String): Result<Unit> = call {
         val res = send(
             newRequest("/inject/${encode(id)}")

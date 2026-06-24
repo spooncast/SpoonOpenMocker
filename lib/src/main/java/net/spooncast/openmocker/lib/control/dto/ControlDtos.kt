@@ -47,25 +47,17 @@ internal data class MockRequestDto(
     val duration: Long = 0L,
 )
 
-/** `GET /inject/sinks` 응답 한 항목. 등록된 [OpenMockerEventSink] 의 노출 정보. */
+/** `GET /inject/injectors` 응답 한 항목. 등록된 [net.spooncast.openmocker.lib.control.OpenMockerEventInjector] 의 노출 정보. */
 @Serializable
-internal data class SinkDto(
+internal data class InjectorDto(
     val id: String,
     val name: String,
-    val presets: List<PresetDto>,
 )
 
-/** sink 가 제공하는 미리 정의된 주입 payload. */
+/** `GET /inject/{id}/recorded` 응답 한 항목. injector 가 수신한 프레임(일련번호 + 원문). */
 @Serializable
-internal data class PresetDto(
-    val name: String,
-    val payload: String,
-)
-
-/** `GET /inject/{id}/received` 응답 한 항목. sink 가 수신한 프레임(일련번호 + 원문). */
-@Serializable
-internal data class ReceivedMessageDto(
-    val seq: Long,
+internal data class RecordedMessageDto(
+    val sequence: Long,
     val payload: String,
 )
 

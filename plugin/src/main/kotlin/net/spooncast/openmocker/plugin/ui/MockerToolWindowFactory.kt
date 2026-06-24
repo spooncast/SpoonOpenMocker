@@ -108,7 +108,7 @@ class MockerToolWindowFactory : ToolWindowFactory {
 
         val tabs = JTabbedPane().apply {
             addTab("REST", restPanel)
-            addTab("WebSocket", wsPanel)
+            addTab("Event Injection", wsPanel)
         }
 
         val mainPanel = JPanel(BorderLayout()).apply {

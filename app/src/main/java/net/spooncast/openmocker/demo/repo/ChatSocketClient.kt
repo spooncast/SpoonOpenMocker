@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * 운영/디버그 구현이 이 계약 하나를 공유한다:
  * - 운영 구현은 실제 소켓을 열어 `onMessage` 프레임을 [incoming] 으로 forward 한다.
- * - 데모 구현([DemoChatSocketClient])은 OpenMocker sink 가 주입한 payload 를 [incoming] 으로 흘려보낸다.
+ * - 데모 구현([DemoChatSocketClient])은 OpenMocker injector 가 주입한 payload 를 [incoming] 으로 흘려보낸다.
  *
  * UI 는 어느 구현인지 모른 채 [incoming] 만 구독하므로, 같은 seam 으로 실제/모킹이 갈린다.
  */
