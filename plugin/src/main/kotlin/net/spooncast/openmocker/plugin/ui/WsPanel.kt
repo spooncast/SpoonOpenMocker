@@ -54,6 +54,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
     private val injectButton = JButton("보내기").apply { isEnabled = false }
     private val statusLabel = JBLabel("")
     private val refreshButton = JButton("새로고침")
+    private val clearReceivedButton = JButton("수신 Clear").apply { isEnabled = false }
 
     private var scheduler: ScheduledExecutorService? = null
 
@@ -90,6 +91,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
         }
         val right = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 2)).apply {
             add(refreshButton)
+            add(clearReceivedButton)
         }
         add(left, BorderLayout.WEST)
         add(right, BorderLayout.EAST)
@@ -125,6 +127,19 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
         refreshButton.addActionListener {
             loadSinks()
             refreshReceivedAsync()
+        }
+
+        // 선택된 sink 의 수신 이력을 비운다(REST 의 전체 Clear 대응). 성공하면 서버 진실로 표를 다시 채운다.
+        clearReceivedButton.addActionListener {
+            val id = selectedSinkId ?: return@addActionListener
+            Thread {
+                val result = client.clearReceived(id)
+                SwingUtilities.invokeLater {
+                    statusLabel.text = if (result.isSuccess) "● 수신 목록 비움"
+                    else "✗ 수신 Clear 실패: ${result.exceptionOrNull()?.message}"
+                }
+                if (result.isSuccess) refreshReceived()
+            }.apply { isDaemon = true; start() }
         }
 
         sinkCombo.addActionListener {
@@ -173,6 +188,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
                         selectedSinkId = sinks[0].id
                         updatePresets(sinks[0])
                         injectButton.isEnabled = true
+                        clearReceivedButton.isEnabled = true
                     } else {
                         selectedSinkId = null
                         presetsPanel.removeAll()
@@ -180,6 +196,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
                         presetsPanel.repaint()
                         receivedModel.update(emptyList())
                         injectButton.isEnabled = false
+                        clearReceivedButton.isEnabled = false
                     }
                     statusLabel.text = if (sinks.isEmpty()) "등록된 대상 없음" else ""
                 } else {

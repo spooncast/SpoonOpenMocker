@@ -67,6 +67,11 @@ class DemoChatSocketClient @Inject constructor() : ChatSocketClient {
         recent.toList().asReversed()
     }
 
+    /** 수신 히스토리 버퍼를 비운다(플러그인의 수신 Clear). seq 카운터는 유지해 이후 프레임과 구분된다. */
+    fun clearRecent() = synchronized(recentLock) {
+        recent.clear()
+    }
+
     companion object {
         private const val RECENT_CAPACITY = 50
     }

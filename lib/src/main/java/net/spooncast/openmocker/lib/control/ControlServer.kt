@@ -160,6 +160,15 @@ internal class ControlServer(
                 }
             }
 
+            request.method == "DELETE" && path.startsWith("/inject/") && path.endsWith("/received") -> {
+                val id = path.removePrefix("/inject/").removeSuffix("/received")
+                if (service.clearReceived(id)) {
+                    200 to json.encodeToString(OkDto())
+                } else {
+                    404 to errorBody("unknown sink: $id")
+                }
+            }
+
             request.method == "POST" && path.startsWith("/inject/") -> {
                 val id = path.removePrefix("/inject/")
                 // body 는 파싱 없이 통째 전달한다.

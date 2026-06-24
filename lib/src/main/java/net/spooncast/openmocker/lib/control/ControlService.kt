@@ -93,6 +93,16 @@ internal class ControlService(
     }
 
     /**
+     * `DELETE /inject/{id}/received` — 해당 sink 의 수신 이력 버퍼를 비운다(REST 의 전체 Clear 대응).
+     * 등록되지 않은 id 면 false(→ 라우터가 404 로 변환).
+     */
+    fun clearReceived(id: String): Boolean {
+        val sink = sinkRegistry.get(id) ?: return false
+        sink.clearReceived()
+        return true
+    }
+
+    /**
      * `POST /inject/{id}` — 해당 sink 에 raw payload 를 주입한다.
      * 등록되지 않은 id 면 false 를 반환한다.
      */

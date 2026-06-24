@@ -80,6 +80,12 @@ class ControlClient(
         gson.fromJson<List<ReceivedMessage>>(res.body(), type) ?: emptyList()
     }
 
+    /** `DELETE /inject/{id}/received` — 해당 sink 의 수신 이력 버퍼를 비운다. 미등록 sink 면 404 → 실패. */
+    fun clearReceived(id: String): Result<Unit> = call {
+        val res = send(newRequest("/inject/${encode(id)}/received").DELETE().build())
+        ensureSuccess(res)
+    }
+
     /** `POST /inject/{id}` — raw payload 를 파싱 없이 그대로 전달. 미등록 sink 면 404 → 실패. */
     fun inject(id: String, payload: String): Result<Unit> = call {
         val res = send(

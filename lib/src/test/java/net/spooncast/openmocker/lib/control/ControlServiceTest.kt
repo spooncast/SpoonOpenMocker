@@ -187,4 +187,28 @@ class ControlServiceTest {
 
         assertFalse(result)
     }
+
+    @Test
+    fun `clearReceived 는 등록된 sink 의 clearReceived 를 호출하고 true 를 반환한다`() {
+        var cleared = false
+        SinkRegistry.register(object : OpenMockerEventSink {
+            override val id: String = "wala"
+            override val name: String = "WALA"
+            override fun inject(payload: String) = Unit
+            override fun presets(): List<Preset> = emptyList()
+            override fun clearReceived() { cleared = true }
+        })
+
+        val result = service.clearReceived("wala")
+
+        assertTrue(result)
+        assertTrue(cleared)
+    }
+
+    @Test
+    fun `clearReceived 는 미등록 id 면 false 를 반환한다`() {
+        val result = service.clearReceived("unknown")
+
+        assertFalse(result)
+    }
 }
