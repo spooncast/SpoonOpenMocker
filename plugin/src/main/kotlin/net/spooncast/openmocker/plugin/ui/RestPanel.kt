@@ -8,6 +8,7 @@ import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.InlineBanner
 import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
+import net.spooncast.openmocker.plugin.util.JsonFormatter
 import net.spooncast.openmocker.plugin.net.ControlClient
 import net.spooncast.openmocker.plugin.net.MockRequest
 import net.spooncast.openmocker.plugin.net.RecordedEntry
@@ -40,7 +41,10 @@ class RestPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
     }
 
     private val codeField = JBTextField(6)
-    private val bodyArea = JBTextArea(5, 40).apply { lineWrap = true; wrapStyleWord = true }
+    private val bodyArea = JBTextArea(5, 40).apply {
+        lineWrap = true; wrapStyleWord = true
+        margin = JBUI.insets(6)  // 입력란 안쪽 여백 — Status Code 필드의 기본 LaF inset 과 맞춤
+    }
 
     private val saveButton = JButton("저장").apply { isEnabled = false }
     private val clearMockButton = JButton("Mock 해제").apply { isEnabled = false }
@@ -124,7 +128,7 @@ class RestPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
             val entry = tableModel.getEntryAt(row)
             editingEntry = entry
             codeField.text = (entry.mock?.code ?: entry.response.code).toString()
-            bodyArea.text = entry.mock?.body ?: entry.response.body
+            bodyArea.text = JsonFormatter.pretty(entry.mock?.body ?: entry.response.body)
             saveButton.isEnabled = true
             clearMockButton.isEnabled = entry.mock != null
         }

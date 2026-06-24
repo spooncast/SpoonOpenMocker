@@ -8,6 +8,7 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
 import net.spooncast.openmocker.plugin.net.ControlClient
 import net.spooncast.openmocker.plugin.net.Sink
+import net.spooncast.openmocker.plugin.util.JsonFormatter
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.JButton
@@ -20,7 +21,10 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
     private var sinks: List<Sink> = emptyList()
     private val sinkCombo = JComboBox<String>()
     private val presetsPanel = JPanel(FlowLayout(FlowLayout.LEFT, 4, 2))
-    private val payloadArea = JBTextArea(8, 40).apply { lineWrap = true; wrapStyleWord = true }
+    private val payloadArea = JBTextArea(8, 40).apply {
+        lineWrap = true; wrapStyleWord = true
+        margin = JBUI.insets(6)  // 입력란 안쪽 여백 — Status Code 필드의 기본 LaF inset 과 맞춤
+    }
     private val injectButton = JButton("보내기").apply { isEnabled = false }
     private val statusLabel = JBLabel("")
     private val refreshButton = JButton("새로고침")
@@ -134,7 +138,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
         if (sink.presets.isNotEmpty()) presetsPanel.add(JBLabel("예시 메시지:"))
         sink.presets.forEach { preset ->
             presetsPanel.add(JButton(preset.name).apply {
-                addActionListener { payloadArea.text = preset.payload }
+                addActionListener { payloadArea.text = JsonFormatter.pretty(preset.payload) }
             })
         }
         presetsPanel.revalidate()
