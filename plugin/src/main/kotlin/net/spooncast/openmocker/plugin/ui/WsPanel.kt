@@ -41,6 +41,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
         selectionModel.selectionMode = ListSelectionModel.SINGLE_SELECTION
         setShowGrid(false)
         tableHeader.reorderingAllowed = false
+        emptyText.text = "수신된 메시지가 없습니다 — 아래에서 페이로드를 보내면 여기에 기록됩니다."
     }
 
     // 폴링이 항목을 갱신하며 selection 을 복원할 때는, 그 프로그램적 선택이 payloadArea 를 덮지 않게 막는다.
