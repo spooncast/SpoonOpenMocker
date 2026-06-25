@@ -64,6 +64,8 @@ class MockerToolWindowFactory : ToolWindowFactory {
             Thread {
                 val result = session.loadDevices()
                 val onlineDevices = result.getOrNull()?.filter { it.isOnline }.orEmpty()
+                // 실패 사유(adb 미탐색 등)는 EDT 밖에서 미리 추출해 두고, 아래 실패 분기에서 노출한다.
+                val failureMessage = result.exceptionOrNull()?.message
                 // 기기명은 EDT 밖에서 미리 조회한다. "<기기명> (<serial>)" 형식, 실패 시 serial 만.
                 val labels = onlineDevices.associate { device ->
                     val name = session.deviceName(device.serial).getOrNull()?.takeIf { it.isNotBlank() }
@@ -92,6 +94,12 @@ class MockerToolWindowFactory : ToolWindowFactory {
                     } else {
                         devices = emptyList()
                         session.selectDevice(null)
+                        // 빈 드롭다운에 사유까지 묻히지 않도록, adb 미탐색 등 실패 사유를 StatusBar·알림으로 노출한다.
+                        statusBar.update(
+                            ConnectionState.ERROR,
+                            failureMessage
+                                ?: "adb 를 찾을 수 없습니다 — Settings > Tools > OpenMocker 에서 Android SDK 경로를 지정하세요.",
+                        )
                     }
                     suppressDeviceEvent = false
                     // 리스너를 억제했으므로 선택된 기기의 세션 시작을 직접(백그라운드로) 트리거한다.

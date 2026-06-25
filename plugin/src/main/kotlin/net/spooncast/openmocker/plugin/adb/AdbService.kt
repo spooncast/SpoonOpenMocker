@@ -12,8 +12,10 @@ import java.util.concurrent.TimeUnit
  *
  * 프로세스 실행(부수효과)과 출력 파싱(순수)을 분리한다. 파싱은 [parseDevices]/[parseForwards] 의
  * 순수 함수로 두어 실제 adb 없이 출력 문자열만으로 단위 테스트할 수 있고, 프로세스 실행은 [runner]
- * seam 으로 주입해 기본값은 ProcessBuilder, 테스트는 가짜 러너를 끼울 수 있다. adb 탐색의 env 조회도
- * [env] seam 으로 주입한다.
+ * seam 으로 주입해 기본값은 ProcessBuilder, 테스트는 가짜 러너를 끼울 수 있다. adb 탐색에 닿는 외부
+ * 상태 — env 조회([env]), 파일 존재([fileExists]), 설정 override([settingsAdbPath]), 홈 디렉토리
+ * ([userHome]) · OS 이름([osName]) — 도 모두 seam 으로 주입해 실제 파일시스템 없이 탐색 로직을 단위
+ * 테스트할 수 있다.
  *
  * 운영 시 [forward] 는 기기 loopback 의 제어 서버 포트(기본 8099)를 데스크톱 loopback 으로 노출해
  * [ControlClient][net.spooncast.openmocker.plugin.net.ControlClient] 가 접속할 수 있게 한다.
@@ -22,6 +24,10 @@ class AdbService(
     private val env: (String) -> String? = System::getenv,
     private val timeout: Long = DEFAULT_TIMEOUT_SECONDS,
     private val runner: (List<String>) -> ProcessResult = { runProcess(it, timeout) },
+    private val fileExists: (String) -> Boolean = { File(it).isFile },
+    private val settingsAdbPath: () -> String? = { null },
+    private val userHome: () -> String? = { System.getProperty("user.home") },
+    private val osName: () -> String = { System.getProperty("os.name").orEmpty() },
 ) {
     /** 프로세스 1회 실행 결과. [exitCode] 가 null 이면 타임아웃으로 강제 종료된 것이다. */
     data class ProcessResult(
@@ -89,19 +95,63 @@ class AdbService(
         exec(listOf(resolveAdb(), "-s", serial, "shell", "getprop", prop)).trim()
 
     /**
-     * adb 실행파일 경로를 결정한다. `ANDROID_HOME` → `ANDROID_SDK_ROOT` 의 `platform-tools/adb`
-     * 가 실재하면 그 절대경로를, 둘 다 없으면 `PATH` 위임을 기대하고 `adb` 를 반환한다. 후보 SDK 가
-     * 지정됐는데 실행파일이 없으면 [AdbException] 으로 실패시킨다(오타·미설치 조기 발견).
+     * adb 실행파일 경로를 우선순위대로 결정한다:
+     * 1. 설정 override([settingsAdbPath]) — 사용자가 Settings 에 지정한 SDK 루트.
+     * 2. `ANDROID_HOME` → `ANDROID_SDK_ROOT` 환경변수.
+     * 3. OS 표준 기본 설치 위치([standardSdkRoots]) — GUI 로 띄운 IDE 처럼 env 가 없는 환경 대비.
+     * 4. 위 후보가 모두 없으면 `PATH` 위임을 기대하고 `adb`(Windows `adb.exe`)를 반환.
+     *
+     * override·env 처럼 **명시적으로 지정된** SDK 루트 아래에 실행파일이 없으면 [AdbException] 으로
+     * 실패시킨다(오타·미설치 조기 발견). 표준 위치는 "있으면 쓰는" 후보라 없으면 다음 단계로 넘어간다.
      */
     private fun resolveAdb(): String {
+        settingsAdbPath()?.takeIf { it.isNotBlank() }?.let { home ->
+            val candidate = adbUnder(home)
+            if (fileExists(candidate)) return candidate
+            throw AdbException("설정된 SDK 경로 아래에서 adb 실행파일을 찾지 못했습니다: $candidate")
+        }
         for (key in SDK_ENV_KEYS) {
             val home = env(key)?.takeIf { it.isNotBlank() } ?: continue
-            val candidate = File(File(home, "platform-tools"), adbExecutableName())
-            if (candidate.isFile) return candidate.absolutePath
-            throw AdbException("$key=$home 아래에서 adb 실행파일을 찾지 못했습니다: ${candidate.absolutePath}")
+            val candidate = adbUnder(home)
+            if (fileExists(candidate)) return candidate
+            throw AdbException("$key=$home 아래에서 adb 실행파일을 찾지 못했습니다: $candidate")
+        }
+        for (home in standardSdkRoots()) {
+            val candidate = adbUnder(home)
+            if (fileExists(candidate)) return candidate
         }
         return adbExecutableName()
     }
+
+    /** SDK 루트 아래 `platform-tools/adb`(Windows `adb.exe`)의 절대경로 문자열. */
+    private fun adbUnder(sdkHome: String): String =
+        File(File(sdkHome, "platform-tools"), adbExecutableName()).absolutePath
+
+    /**
+     * OS 표준 Android SDK 설치 위치 후보(우선순위 순). [userHome]/[osName]/[env] seam 에만 의존해
+     * 실제 FS 없이도 결정적이다. 후보를 못 만들면(홈 디렉토리 미상 등) 빈 리스트.
+     * - macOS: `~/Library/Android/sdk`
+     * - Linux: `~/Android/Sdk`
+     * - Windows: `%LOCALAPPDATA%\Android\Sdk`
+     */
+    private fun standardSdkRoots(): List<String> {
+        if (isWindows()) {
+            val localAppData = env("LOCALAPPDATA")?.takeIf { it.isNotBlank() } ?: return emptyList()
+            return listOf(File(File(localAppData, "Android"), "Sdk").path)
+        }
+        val home = userHome()?.takeIf { it.isNotBlank() } ?: return emptyList()
+        return if (isMac()) {
+            listOf(File(File(File(home, "Library"), "Android"), "sdk").path)
+        } else {
+            listOf(File(File(home, "Android"), "Sdk").path)
+        }
+    }
+
+    private fun isWindows(): Boolean = osName().startsWith("Windows", ignoreCase = true)
+
+    private fun isMac(): Boolean = osName().startsWith("Mac", ignoreCase = true)
+
+    private fun adbExecutableName(): String = if (isWindows()) "adb.exe" else "adb"
 
     /** 프로세스를 실행하고 비정상 종료/타임아웃을 [AdbException] 으로 변환한 뒤 stdout 을 돌려준다. */
     private fun exec(command: List<String>): String {
@@ -147,9 +197,6 @@ class AdbService(
 
         /** adb 탐색 시 우선순위대로 조회하는 SDK 루트 env 키. */
         private val SDK_ENV_KEYS = listOf("ANDROID_HOME", "ANDROID_SDK_ROOT")
-
-        private fun adbExecutableName(): String =
-            if (System.getProperty("os.name").orEmpty().startsWith("Windows", ignoreCase = true)) "adb.exe" else "adb"
 
         /** 실제 프로세스를 ProcessBuilder 로 실행하는 기본 runner. 타임아웃 시 [ProcessResult.exitCode] 가 null. */
         private fun runProcess(command: List<String>, timeout: Long): ProcessResult {
