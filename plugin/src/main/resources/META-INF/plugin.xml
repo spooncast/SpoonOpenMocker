@@ -8,6 +8,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>0.1.0-beta2</b>
+        <ul>
+            <li>REST tab: add Delay (ms) field to mock responses.</li>
+            <li>UX: non-blocking actions (no IDE freeze), confirm dialog for Clear all, inline save feedback, empty-state hints, Enter to save, selection kept after save.</li>
+            <li>Fix: polling lifecycle on tool window re-show; control server socket read timeout to avoid hangs.</li>
+        </ul>
         <b>0.1.0-beta1</b> — first internal beta.
         <ul>
             <li>Tool window control panel for a connected Android device (REST + WebSocket).</li>
