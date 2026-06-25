@@ -54,7 +54,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
     private val injectButton = JButton("보내기").apply { isEnabled = false }
     private val statusLabel = JBLabel("")
     private val refreshButton = JButton("새로고침")
-    private val clearRecordedButton = JButton("수신 Clear").apply { isEnabled = false }
+    private val clearRecordedButton = JButton("전체 Clear").apply { isEnabled = false }
 
     private var scheduler: ScheduledExecutorService? = null
 
@@ -135,7 +135,7 @@ class WsPanel(private val client: ControlClient) : JPanel(BorderLayout()) {
                 val result = client.clearRecorded(id)
                 SwingUtilities.invokeLater {
                     statusLabel.text = if (result.isSuccess) "● 수신 목록 비움"
-                    else "✗ 수신 Clear 실패: ${result.exceptionOrNull()?.message}"
+                    else "✗ 전체 Clear 실패: ${result.exceptionOrNull()?.message}"
                 }
                 if (result.isSuccess) refreshRecorded()
             }.apply { isDaemon = true; start() }
