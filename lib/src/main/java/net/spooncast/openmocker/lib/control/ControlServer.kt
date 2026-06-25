@@ -21,6 +21,7 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.net.SocketTimeoutException
 import java.net.URLDecoder
 
 /**
@@ -102,11 +103,18 @@ internal class ControlServer(
 
     private fun handle(socket: Socket) {
         socket.use { s ->
+            // 소켓 read 타임아웃 — 아무것도(또는 일부만) 보내지 않는 half-open 커넥션이 readHttpRequest 의
+            // 블로킹 read 에서 IO 스레드를 무한 점유하는 것을 막는다. 타임아웃 시 read 가
+            // SocketTimeoutException 을 던지고, 아래 catch 가 응답/종료로 스레드를 반환한다.
+            // 루프백+adb 경유라 정상 요청은 즉시 도착하므로 짧은 타임아웃으로 충분하다.
+            s.soTimeout = SOCKET_READ_TIMEOUT_MS
             val output = s.getOutputStream()
             try {
                 val request = readHttpRequest(s.getInputStream())
                 val (status, body) = route(request)
                 writeResponse(output, status, body)
+            } catch (e: SocketTimeoutException) {
+                // half-open/지연 커넥션 — 응답을 쓸 대상이 없으므로 조용히 닫는다(use 가 닫음).
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to handle control request", e)
                 try {
@@ -233,6 +241,9 @@ internal class ControlServer(
     companion object {
         private const val TAG = "OpenMockerControlServer"
         const val DEFAULT_PORT = 8099
+
+        // 커넥션당 read 타임아웃(ms). 루프백 경유 제어 요청은 즉시 도착하므로 넉넉하면서도 유한한 값.
+        private const val SOCKET_READ_TIMEOUT_MS = 10_000
     }
 }
 
