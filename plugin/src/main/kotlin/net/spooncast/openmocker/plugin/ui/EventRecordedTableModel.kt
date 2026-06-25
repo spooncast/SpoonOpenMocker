@@ -4,7 +4,7 @@ import net.spooncast.openmocker.plugin.net.RecordedMessage
 import javax.swing.table.AbstractTableModel
 
 /**
- * Event Injection 탭의 수신 메시지 표 모델. REST 탭의 [RecordedTableModel] 과 같은 골격이되,
+ * WebSocket 탭의 수신 메시지 표 모델. REST 탭의 [RecordedTableModel] 과 같은 골격이되,
  * 컬럼은 단일("수신 메시지")이다. 셀 값은 payload 를 한 줄로 접은 미리보기로, 행 선택 시
  * 원문([getMessageAt])을 입력란에 복사한다.
  */
