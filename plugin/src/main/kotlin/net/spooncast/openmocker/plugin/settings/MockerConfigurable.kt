@@ -9,7 +9,7 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 
 /**
- * Settings/Preferences > Tools > OpenMocker 화면. [MockerSettings] 값을 노출·편집한다.
+ * Settings/Preferences > Tools > SpoonOpenMocker 화면. [MockerSettings] 값을 노출·편집한다.
  *
  * UI 는 플랫폼 번들 Kotlin UI DSL 만 쓴다(외부 의존성 0 원칙). 각 입력은 [MockerSettings.state] 의
  * 필드에 직접 바인딩되므로, DSL 이 reset/isModified/apply 를 자동 처리한다. 값의 유효 범위만
@@ -18,7 +18,7 @@ import com.intellij.ui.dsl.builder.panel
  * `lastDeviceSerial` 은 사용자가 직접 입력하는 값이 아니라 기기 드롭다운이 갱신하는 값이라 이 화면엔
  * 노출하지 않는다.
  */
-class MockerConfigurable : BoundConfigurable("OpenMocker") {
+class MockerConfigurable : BoundConfigurable("SpoonOpenMocker") {
 
     private val state get() = MockerSettings.getInstance().state
 

@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>net.spooncast.openmocker.plugin</id>
-    <name>OpenMocker</name>
+    <name>SpoonOpenMocker</name>
     <vendor>Spooncast</vendor>
     <description><![CDATA[
         Desktop control panel for the OpenMocker library — edit REST mocks and fire
@@ -29,8 +29,9 @@
         <projectService serviceImplementation="net.spooncast.openmocker.plugin.session.MockerSession" />
         <!-- 빈 ToolWindow 골격. REST/WS 패널은 T14/T15 에서 채운다. -->
         <toolWindow
-            id="OpenMocker"
+            id="SpoonOpenMocker"
             anchor="right"
+            icon="/icons/spoonOpenMocker.svg"
             factoryClass="net.spooncast.openmocker.plugin.ui.MockerToolWindowFactory" />
 
         <notificationGroup id="OpenMocker" displayType="BALLOON" />
@@ -39,7 +40,7 @@
         <applicationConfigurable
             parentId="tools"
             id="net.spooncast.openmocker.settings"
-            displayName="OpenMocker"
+            displayName="SpoonOpenMocker"
             instance="net.spooncast.openmocker.plugin.settings.MockerConfigurable" />
     </extensions>
 </idea-plugin>
