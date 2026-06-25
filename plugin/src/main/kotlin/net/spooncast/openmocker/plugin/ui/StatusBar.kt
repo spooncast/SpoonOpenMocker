@@ -41,7 +41,7 @@ class StatusBar(private val project: Project) : JPanel(FlowLayout(FlowLayout.LEF
     private fun notifyError(message: String) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("OpenMocker")
-            .createNotification("OpenMocker 연결 실패", message, NotificationType.ERROR)
+            .createNotification("SpoonOpenMocker 연결 실패", message, NotificationType.ERROR)
             .notify(project)
     }
 }
