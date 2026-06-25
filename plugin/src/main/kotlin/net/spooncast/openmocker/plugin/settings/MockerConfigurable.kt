@@ -4,8 +4,11 @@ import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.dsl.builder.COLUMNS_LARGE
 import com.intellij.ui.dsl.builder.bindIntText
 import com.intellij.ui.dsl.builder.bindSelected
+import com.intellij.ui.dsl.builder.bindText
+import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 
 /**
@@ -36,6 +39,12 @@ class MockerConfigurable : BoundConfigurable("OpenMocker") {
         row {
             cell(JBCheckBox("기기 선택 시 자동으로 adb forward 설정"))
                 .bindSelected(state::autoForward)
+        }
+        row("Android SDK path:") {
+            textField()
+                .columns(COLUMNS_LARGE)
+                .bindText(state::sdkPath)
+                .comment("비워두면 ANDROID_HOME·표준 위치를 자동 탐색합니다. 자동 탐색이 실패할 때만 SDK 루트 경로를 지정하세요 (예: ~/Library/Android/sdk).")
         }
     }
 

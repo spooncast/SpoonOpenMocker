@@ -10,7 +10,10 @@ enum class ConnectionState { IDLE, FORWARDING, CONNECTED, ERROR }
 
 @Service(Service.Level.PROJECT)
 class MockerSession(@Suppress("UNUSED_PARAMETER") project: Project) {
-    private val adb = AdbService()
+    // settingsAdbPath 는 람다로 넘겨 매 adb 호출 시 최신 설정값을 읽는다(IDE 재시작 없이 경로 변경 반영).
+    private val adb = AdbService(
+        settingsAdbPath = { MockerSettings.getInstance().state.sdkPath.takeIf { it.isNotBlank() } },
+    )
     private val settings get() = MockerSettings.getInstance().state
 
     var connectionState: ConnectionState = ConnectionState.IDLE

@@ -31,12 +31,16 @@ class MockerSettings : PersistentStateComponent<MockerSettings.State> {
      * - [lastDeviceSerial]: 마지막으로 선택한 adb 기기 serial. 미선택 상태는 빈 문자열.
      * - [pollIntervalMs]: REST 기록 테이블 폴링 주기(ms, 기본 [DEFAULT_POLL_INTERVAL_MS]).
      * - [autoForward]: 기기 선택 시 자동으로 adb forward 를 설정할지 여부.
+     * - [sdkPath]: Android SDK 루트 경로 override. 빈 문자열이면 미지정(env·표준 위치 자동 탐색).
+     *   지정 시 [AdbService][net.spooncast.openmocker.plugin.adb.AdbService] 가 그 아래
+     *   `platform-tools/adb` 를 최우선으로 찾는다(자동 탐색이 실패하는 비표준 설치 탈출구).
      */
     data class State(
         var port: Int = DEFAULT_PORT,
         var lastDeviceSerial: String = "",
         var pollIntervalMs: Int = DEFAULT_POLL_INTERVAL_MS,
         var autoForward: Boolean = true,
+        var sdkPath: String = "",
     )
 
     private var state = State()

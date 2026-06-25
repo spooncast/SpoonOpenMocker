@@ -124,11 +124,13 @@ class AdbServiceTest {
 
     @Test
     fun `resolveAdb falls back to PATH when no sdk env set`() {
-        // SDK env 가 없으면 PATH 위임을 기대하고 "adb" 만으로 실행 — 명령 첫 토큰으로 확인한다.
+        // env·override·표준 위치가 모두 없으면 PATH 위임을 기대하고 "adb" 만으로 실행 — 명령 첫 토큰으로
+        // 확인한다. fileExists 를 항상 false 로 주입해 호스트의 실제 SDK 설치 유무와 무관하게 결정적이다.
         var captured: List<String>? = null
         val service = AdbService(
             env = { null },
             runner = { cmd -> captured = cmd; ProcessResult(0, "List of devices attached\n", "") },
+            fileExists = { false },
         )
 
         val result = service.devices()
@@ -138,11 +140,84 @@ class AdbServiceTest {
     }
 
     @Test
+    fun `resolveAdb uses standard macOS sdk location when no env set`() {
+        // env 가 없어도 macOS 표준 위치(~/Library/Android/sdk)에 adb 가 있으면 그 절대경로를 쓴다.
+        val expected = "/Users/test/Library/Android/sdk/platform-tools/adb"
+        var captured: List<String>? = null
+        val service = AdbService(
+            env = { null },
+            runner = { cmd -> captured = cmd; ProcessResult(0, "List of devices attached\n", "") },
+            fileExists = { it == expected },
+            userHome = { "/Users/test" },
+            osName = { "Mac OS X" },
+        )
+
+        val result = service.devices()
+
+        assertTrue(result.isSuccess)
+        assertEquals(expected, captured?.first())
+    }
+
+    @Test
+    fun `resolveAdb uses standard Linux sdk location when no env set`() {
+        val expected = "/home/test/Android/Sdk/platform-tools/adb"
+        var captured: List<String>? = null
+        val service = AdbService(
+            env = { null },
+            runner = { cmd -> captured = cmd; ProcessResult(0, "List of devices attached\n", "") },
+            fileExists = { it == expected },
+            userHome = { "/home/test" },
+            osName = { "Linux" },
+        )
+
+        service.devices()
+
+        assertEquals(expected, captured?.first())
+    }
+
+    @Test
+    fun `resolveAdb prefers settings override over env and standard location`() {
+        // 모든 후보가 존재(fileExists=true)해도 override 가 최우선이어야 한다.
+        val expected = "/custom/sdk/platform-tools/adb"
+        var captured: List<String>? = null
+        val service = AdbService(
+            env = { key -> if (key == "ANDROID_HOME") "/env/sdk" else null },
+            runner = { cmd -> captured = cmd; ProcessResult(0, "List of devices attached\n", "") },
+            fileExists = { true },
+            settingsAdbPath = { "/custom/sdk" },
+            userHome = { "/home/test" },
+            osName = { "Linux" },
+        )
+
+        service.devices()
+
+        assertEquals(expected, captured?.first())
+    }
+
+    @Test
+    fun `resolveAdb fails when settings override set but executable missing`() {
+        // override SDK 경로 아래에 adb 가 없으면 조기 실패(오타·미설치 발견).
+        val service = AdbService(
+            env = { null },
+            runner = { ProcessResult(0, "", "") },
+            fileExists = { false },
+            settingsAdbPath = { "/custom/sdk" },
+        )
+
+        val result = service.devices()
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is AdbException)
+        assertTrue(result.exceptionOrNull()!!.message!!.contains("/custom/sdk"))
+    }
+
+    @Test
     fun `resolveAdb fails when sdk env set but executable missing`() {
         // ANDROID_HOME 가 가리키는 곳에 platform-tools/adb 가 없으면 조기 실패(오타·미설치 발견).
         val service = AdbService(
             env = { key -> if (key == "ANDROID_HOME") "/no/such/sdk/path" else null },
             runner = { ProcessResult(0, "", "") },
+            fileExists = { false },
         )
 
         val result = service.devices()
@@ -160,6 +235,7 @@ class AdbServiceTest {
         val service = AdbService(
             env = { null },
             runner = { cmd -> captured = cmd; ProcessResult(0, "", "") },
+            fileExists = { false },
         )
 
         val result = service.forward(serial = "emulator-5554", port = 8099)
@@ -177,6 +253,7 @@ class AdbServiceTest {
         val service = AdbService(
             env = { null },
             runner = { cmd -> captured = cmd; ProcessResult(0, "", "") },
+            fileExists = { false },
         )
 
         service.removeForward(serial = "emulator-5554", port = 8099)
