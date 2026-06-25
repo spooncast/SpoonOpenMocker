@@ -15,6 +15,10 @@ class RecordedTableModel : AbstractTableModel() {
 
     fun getEntryAt(row: Int): RecordedEntry = entries[row]
 
+    /** method+path(기록 항목의 고유 키)로 행 인덱스를 찾는다. 없으면 -1. */
+    fun indexOfEntry(method: String, path: String): Int =
+        entries.indexOfFirst { it.method == method && it.path == path }
+
     override fun getRowCount(): Int = entries.size
 
     override fun getColumnCount(): Int = columns.size
