@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "net.spooncast.openmocker"
-version = "0.1.0-beta2"
+version = "0.1.0-beta3"
 
 repositories {
     mavenCentral()
